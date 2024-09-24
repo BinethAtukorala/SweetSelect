@@ -33,10 +33,7 @@ classdef LBRiiwa < RobotBaseClass
             link(4).qlim = [-120 120]*pi/180;
             link(5).qlim = [-170 170]*pi/180;
             link(6).qlim = [-120 120]*pi/180;
-            link(7).qlim = [-175 175]*pi/180;
-
-            % link(3).offset = -pi/2;
-            % link(5).offset = -pi/2;     
+            link(7).qlim = [-175 175]*pi/180;  
              
             self.model = SerialLink(link,'name',self.name);
         end      
