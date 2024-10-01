@@ -4,7 +4,6 @@ classdef LBRiiwaClass
     end
 
     methods
-        %% Constructor to initialize the robot model
         function obj = LBRiiwaClass()
             % Initialize the robot model LBRiiwa
             % The robot is placed at a translational offset on top of the table
@@ -18,17 +17,16 @@ classdef LBRiiwaClass
             Midway_Pose = % Edit the midway pose where LBRiiwa holds the box here
             Final_Pose = % Edit the final pose where LBRiiwa keeps the box on the counter
 
-            % Get the current robot pose and compute joint angles for initial (to pick up brick) and final (to place brick) poses
+            % Get the necessary robot poses
             LBRiiwa_Pose = LBRiiwa.model.getpos();
             Initial_Joint_Angles = LBRiiwa.model.ikcon(Start_Pose);
-            Midway_Joint_Angles = LBRiiwa.model.ikcon(Midway_Pose;
+            Midway_Joint_Angles = LBRiiwa.model.ikcon(Midway_Pose);
             Final_Joint_Angles = LBRiiwa.model.ikcon(Final_Pose);
 
-
+            % Calculate the trajectories
             Current_To_Initial = jtraj(LBRiiwa_Pose, Initial_Joint_Angles, 30);
             Initial_To_Midway = jtraj(Initial_Joint_Angles, Midway_Joint_Angles, 30);
             Midway_To_Final = jtraj(Midway_Joint_Angles, Final_Joint_Angles, 30);        
-
 
             % move robot from current pose to pick up box
             obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, Current_To_Initial)
@@ -42,8 +40,6 @@ classdef LBRiiwaClass
             obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Midway_To_Final)
 
             Box_Gripper.openGripper();
-    
-
         end
 
         function moveWithBox(obj, LBRiiwa, Box_Gripper, Trajectory)
