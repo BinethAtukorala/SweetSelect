@@ -17,7 +17,7 @@ classdef BoxClass
             
             while index <= size(Initial_Box_Poses, 1)
                 % Place each box at its initial position
-                Placed_Boxes = PlaceObject('opencrate2.ply', Initial_Box_Poses(index, :));
+                Placed_Boxes = PlaceObject('box.ply', Initial_Box_Poses(index, :));
                 Boxes = [Boxes, Placed_Boxes];
                 Vertices = get(Placed_Boxes, 'Vertices') % need to add this to get vertices of box
                 index = index + 1;
