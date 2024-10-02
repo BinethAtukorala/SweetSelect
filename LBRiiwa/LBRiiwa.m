@@ -27,11 +27,11 @@ classdef LBRiiwa < RobotBaseClass
             link(7) = Link('d',	0.0945,'a',0,'alpha',0,'qlim',deg2rad([-360,360]), 'offset', 0);
             
             % Incorporate joint limits
-            link(1).qlim = [-170 170]*pi/180;
+            link(1).qlim = [-180 180]*pi/180;
             link(2).qlim = [-120 120]*pi/180;
-            link(3).qlim = [-170 170]*pi/180;
+            link(3).qlim = [-180 180]*pi/180;
             link(4).qlim = [-120 120]*pi/180;
-            link(5).qlim = [-170 170]*pi/180;
+            link(5).qlim = [-180 180]*pi/180;
             link(6).qlim = [-120 120]*pi/180;
             link(7).qlim = [-175 175]*pi/180;
              
