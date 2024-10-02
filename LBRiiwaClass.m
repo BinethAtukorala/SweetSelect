@@ -13,20 +13,24 @@ classdef LBRiiwaClass
         function moveLBRiiwa(obj, LBRiiwa, Box_Gripper, Initial_Box_Pose)
 
             % Make it so that the end effector grips the box from the side
-            Start_Pose = [eye(3), Initial_Box_Pose'; 0, 0, 0, 1] * trotx(pi/2);
-            Midway_Pose = % Edit the midway pose where LBRiiwa holds the box here
-            Final_Pose = % Edit the final pose where LBRiiwa keeps the box on the counter
+            Start_Pose = [eye(3), Initial_Box_Pose'; 0, 0, 0, 1]  * troty(-pi/2);
 
             % Get the necessary robot poses
             LBRiiwa_Pose = LBRiiwa.model.getpos();
             Initial_Joint_Angles = LBRiiwa.model.ikcon(Start_Pose);
-            Midway_Joint_Angles = LBRiiwa.model.ikcon(Midway_Pose);
-            Final_Joint_Angles = LBRiiwa.model.ikcon(Final_Pose);
+
+            % Waypoints
+            First_Waypoint_Joint_Angles = [11, -80, 170, 18, 170, -29, 20] * pi / 180;
+            Midway_Pose_Joint_Angles = [170, -80, 170, 18, 170, -29, 20] * pi / 180;
+            Second_Waypoint_Joint_Angles = [92, -80, 170, 18, 170, -29, 20] * pi / 180;
+            Final_Pose_Joint_Angles = [92, -118, 170, 18, 170, 12, 20] * pi / 180;
 
             % Calculate the trajectories
-            Current_To_Initial = jtraj(LBRiiwa_Pose, Initial_Joint_Angles, 30);
-            Initial_To_Midway = jtraj(Initial_Joint_Angles, Midway_Joint_Angles, 30);
-            Midway_To_Final = jtraj(Midway_Joint_Angles, Final_Joint_Angles, 30);        
+            Current_To_Initial = jtraj(LBRiiwa_Pose, Initial_Joint_Angles, 100);
+            Initial_To_First = jtraj(Initial_Joint_Angles, First_Waypoint_Joint_Angles, 100);
+            First_To_Midway = jtraj(First_Waypoint_Joint_Angles, Midway_Pose_Joint_Angles, 100);
+            Midway_To_Second = jtraj(Midway_Pose_Joint_Angles, Second_Waypoint_Joint_Angles, 100);
+            Second_To_Final = jtraj(Second_Waypoint_Joint_Angles, Final_Pose_Joint_Angles, 100);       
 
             % move robot from current pose to pick up box
             obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, Current_To_Initial)
@@ -34,10 +38,14 @@ classdef LBRiiwaClass
             Box_Gripper.closeGripper();
 
             % move robot from intial pose towards UR3
-            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Initial_To_Midway)
+            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Initial_To_First)
+
+            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, First_To_Midway)
 
             % move robot from UR3 towards counter
-            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Midway_To_Final)
+            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Midway_To_Second)
+
+            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Second_To_Final)
 
             Box_Gripper.openGripper();
         end
