@@ -18,13 +18,13 @@ classdef LBRiiwa < RobotBaseClass
 
 %% CreateModel
         function CreateModel(self)
-            link(1) = Link('d',0.340,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360 360]), 'offset',0);
+            link(1) = Link('d',0.255,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360 360]), 'offset',0);
             link(2) = Link('d',0,'a',0,'alpha',pi/2,'qlim', deg2rad([-360 360]), 'offset',0);
-            link(3) = Link('d',0.400,'a',0,'alpha',pi/2,'qlim', deg2rad([-360 360]), 'offset', 0);
+            link(3) = Link('d',0.300,'a',0,'alpha',pi/2,'qlim', deg2rad([-360 360]), 'offset', 0);
             link(4) = Link('d',0,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360 360]),'offset', 0);
-            link(5) = Link('d',0.400,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360,360]), 'offset',0);
+            link(5) = Link('d',0.300,'a',0,'alpha',-pi/2,'qlim',deg2rad([-360,360]), 'offset',0);
             link(6) = Link('d',	0,'a',0,'alpha',pi/2,'qlim',deg2rad([-360,360]), 'offset', 0);
-            link(7) = Link('d',	0.126,'a',0,'alpha',0,'qlim',deg2rad([-360,360]), 'offset', 0);
+            link(7) = Link('d',	0.0945,'a',0,'alpha',0,'qlim',deg2rad([-360,360]), 'offset', 0);
             
             % Incorporate joint limits
             link(1).qlim = [-170 170]*pi/180;
