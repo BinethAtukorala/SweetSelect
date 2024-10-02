@@ -4,7 +4,7 @@ classdef GripperBoxRight < RobotBaseClass
     % Carter-Davies, D. Electric Robotic Gripper - UR3e. GRABCAD. https://grabcad.com/library/electric-robotic-gripper-ur3e-1 
 
     properties(Access = public)   
-        plyFileNameStem = 'GGripperBoxRight';
+        plyFileNameStem = 'GripperBoxRight';
     end
 
     methods
