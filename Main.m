@@ -19,7 +19,28 @@ Box_Gripper = GripperBoxClass();
 Candy_Gripper = GripperCandyClass();
 
 % Place boxes
-BoxClass.placeBox();
+Front_Box_Poses = [
+    -1.15, 0.9, 0.6;
+    -1.15, 0.9, 0.5;
+];
+
+Back_Box_Poses = [
+    -1.15, 1.1, 0.6;
+    -1.15, 1.1, 0.5;
+];
+
+Front_Boxes = [];
+
+for i = 1:size(Front_Box_Poses, 1)
+    Front_Boxes = [Front_Boxes, BoxClass(Front_Box_Poses(i, :))];
+end
+
+Back_Boxes = [];
+
+for i = 1:size(Front_Box_Poses, 1)
+    Back_Boxes = [Back_Boxes, BoxClass(Back_Box_Poses(i, :))];
+end
+
 
 % Place candies
 CandyClass.placeCandy();
