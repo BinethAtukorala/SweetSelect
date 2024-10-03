@@ -8,7 +8,112 @@ classdef UR3Class
         function obj = UR3Class()
             % Initialize the robot model UR3
             % The robot is placed at a translational offset on top of the table
-            obj.Robot_UR3  = UR3(transl([1, 0, 0.5]));
+            obj.Robot_UR3  = UR3(transl([0.8, 1, 0.6]));
+        end
+
+        function moveRaspberryUR3(obj, UR3, Candy_Gripper, Initial_Candy_Pose)
+            % Calculate start pose for each candy
+            Candy_Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
+            Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.1;  % Adjust height
+        
+            Midway_Waypoint = [26.2, -76.4, -281, -96.1, 90, -71] * pi / 180;
+            Final_Waypoint = [-161, -24, -360, -65.6, 90, -71] * pi / 180;
+            
+            % Get current robot pose
+            UR3_Pose = UR3.model.getpos();
+            
+            % Calculate inverse kinematics to get initial joint angles
+            Candy_Waypoint = UR3.model.ikcon(Candy_Start_Pose);
+        
+            % Calculate trajectories
+            Current_To_Midway = jtraj(UR3_Pose, Midway_Waypoint, 30);
+            Midway_To_Initial = jtraj(Midway_Waypoint, Candy_Waypoint, 30);
+            Initial_To_Midway = jtraj(Candy_Waypoint, Midway_Waypoint, 30);
+            Midway_To_Final = jtraj(Midway_Waypoint, Final_Waypoint, 30);
+            
+            % Animate the robot for each part of the movement
+            obj.moveWithoutCandy(obj,UR3, Candy_Gripper, Current_To_Midway)
+
+            obj.moveWithoutCandy(obj,UR3, Candy_Gripper, Midway_To_Initial)
+
+            Candy_Gripper.closeGripper();
+
+            % move robot towards LBRiiwa
+            obj.moveWithCandy(obj,UR3, Candy_Gripper, Initial_To_Midway)
+
+            obj.moveWithCandy(obj,UR3, Candy_Gripper, Midway_To_Final)
+
+            Candy_Gripper.openGripper();
+        end
+
+        function moveBlueberryUR3(obj, UR3, Candy_Gripper, Initial_Candy_Pose)
+            % Calculate start pose for each candy
+            Candy_Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
+            Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.1;  % Adjust height
+        
+            Midway_Waypoint = [26.2, -76.4, -281, -96.1, 90, -71] * pi / 180;
+            Final_Waypoint = [-161, -24, -360, -65.6, 90, -71] * pi / 180;
+            
+            % Get current robot pose
+            UR3_Pose = UR3.model.getpos();
+            
+            % Calculate inverse kinematics to get initial joint angles
+            Candy_Waypoint = UR3.model.ikcon(Candy_Start_Pose);
+        
+            % Calculate trajectories
+            Current_To_Midway = jtraj(UR3_Pose, Midway_Waypoint, 30);
+            Midway_To_Initial = jtraj(Midway_Waypoint, Candy_Waypoint, 30);
+            Initial_To_Midway = jtraj(Candy_Waypoint, Midway_Waypoint, 30);
+            Midway_To_Final = jtraj(Midway_Waypoint, Final_Waypoint, 30);
+            
+            % Animate the robot for each part of the movement
+            obj.moveWithoutCandy(obj,UR3, Candy_Gripper, Current_To_Midway)
+
+            obj.moveWithoutCandy(obj,UR3, Candy_Gripper, Midway_To_Initial)
+
+            Candy_Gripper.closeGripper();
+
+            % move robot towards LBRiiwa
+            obj.moveWithCandy(obj,UR3, Candy_Gripper, Initial_To_Midway)
+
+            obj.moveWithCandy(obj,UR3, Candy_Gripper, Midway_To_Final)
+
+            Candy_Gripper.openGripper();
+        end
+
+        function moveGreenappleUR3(obj, UR3, Candy_Gripper, Initial_Candy_Pose)
+            % Calculate start pose for each candy
+            Candy_Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
+            Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.1;  % Adjust height
+        
+            Midway_Waypoint = [26.2, -76.4, -281, -96.1, 90, -71] * pi / 180;
+            Final_Waypoint = [-161, -24, -360, -65.6, 90, -71] * pi / 180;
+            
+            % Get current robot pose
+            UR3_Pose = UR3.model.getpos();
+            
+            % Calculate inverse kinematics to get initial joint angles
+            Candy_Waypoint = UR3.model.ikcon(Candy_Start_Pose);
+        
+            % Calculate trajectories
+            Current_To_Midway = jtraj(UR3_Pose, Midway_Waypoint, 30);
+            Midway_To_Initial = jtraj(Midway_Waypoint, Candy_Waypoint, 30);
+            Initial_To_Midway = jtraj(Candy_Waypoint, Midway_Waypoint, 30);
+            Midway_To_Final = jtraj(Midway_Waypoint, Final_Waypoint, 30);
+            
+            % Animate the robot for each part of the movement
+            obj.moveWithoutCandy(obj,UR3, Candy_Gripper, Current_To_Midway)
+
+            obj.moveWithoutCandy(obj,UR3, Candy_Gripper, Midway_To_Initial)
+
+            Candy_Gripper.closeGripper();
+
+            % move robot towards LBRiiwa
+            obj.moveWithCandy(obj,UR3, Candy_Gripper, Initial_To_Midway)
+
+            obj.moveWithCandy(obj,UR3, Candy_Gripper, Midway_To_Final)
+
+            Candy_Gripper.openGripper();
         end
 
         function moveUR3(obj, UR3, Candy_Gripper, Initial_Candy_Pose)
@@ -36,6 +141,7 @@ classdef UR3Class
 
             Candy_Gripper.openGripper();
         end
+
 
         function moveWithCandy(obj, UR3, Candy_Gripper, Trajectory, Candy, Start_Pose)
 
