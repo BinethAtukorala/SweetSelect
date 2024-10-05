@@ -20,13 +20,13 @@ Candy_Gripper = GripperCandyClass();
 
 % Place boxes
 Front_Box_Poses = [
+    -1.15, 0.9, 0.66;
     -1.15, 0.9, 0.6;
-    -1.15, 0.9, 0.5;
 ];
 
 Back_Box_Poses = [
+    -1.15, 1.1, 0.66;
     -1.15, 1.1, 0.6;
-    -1.15, 1.1, 0.5;
 ];
 
 Front_Boxes = [];
