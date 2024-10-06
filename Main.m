@@ -10,7 +10,7 @@ Environment = EnvironmentClass();
 LBRiiwa = LBRiiwaClass();
 
 % Create an instance of the UR3Class, representing the UR3 model
-UR3 = UR3Class();
+UR3e = UR3eClass();
 
 % Create an instance of the GripperBox class, representing the box gripper for handling boxes
 Box_Gripper = GripperBoxClass();
