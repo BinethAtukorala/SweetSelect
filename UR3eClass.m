@@ -11,135 +11,56 @@ classdef UR3eClass
             obj.Robot_UR3e  = UR3e(transl([0.8, 1, 0.6]));
         end
 
-        function moveRaspberryUR3e(obj, UR3e, Candy_Gripper, Initial_Candy_Pose)
-            % Calculate start pose for each candy
-            Candy_Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
-            Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.1;  % Adjust height
-        
-            Midway_Waypoint = [26.2, -76.4, -281, -96.1, 90, -71] * pi / 180;
-            Final_Waypoint = [-161, -24, -360, -65.6, 90, -71] * pi / 180;
+        function moveUR3e(obj, UR3e, Candy_Gripper, Initial_Candy_Pose, Candy_Final_Poses)
+
+                % Calculate start pose for each candy
+                Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
+                Start_Pose(3,4) = Start_Pose(3,4) + 0.1;  % Adjust height
             
-            % Get current robot pose
-            UR3e_Pose = UR3e.model.getpos();
+                % Determine which final candy pose to use, repeating if i > 3
+                % Change the i here to the array index of total candy
+                index = mod(i-1, size(Candy_Final_Poses, 1)) + 1;
+                Candy_Final_Pose = Candy_Final_Poses(index, :);
+                Final_Pose = [eye(3), Candy_Final_Pose'; 0, 0, 0, 1] * trotx(pi);
+                Final_Waypoint = UR3e.model.ikcon(Final_Pose);
             
-            % Calculate inverse kinematics to get initial joint angles
-            Candy_Waypoint = UR3e.model.ikcon(Candy_Start_Pose);
-        
-            % Calculate trajectories
-            Current_To_Midway = jtraj(UR3e_Pose, Midway_Waypoint, 30);
-            Midway_To_Initial = jtraj(Midway_Waypoint, Candy_Waypoint, 30);
-            Initial_To_Midway = jtraj(Candy_Waypoint, Midway_Waypoint, 30);
-            Midway_To_Final = jtraj(Midway_Waypoint, Final_Waypoint, 30);
+                First_Waypoint = [-68, -11, -34, -45, -90, 36] * pi / 180;
+                Second_Waypoint = [16, -26, -50, -14, -90, 106] * pi / 180;
             
-            % Animate the robot for each part of the movement
-            obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Current_To_Midway)
-
-            obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Midway_To_Initial)
-
-            Candy_Gripper.closeGripper();
-
-            % move robot towards LBRiiwa
-            obj.moveWithCandy(obj,UR3e, Candy_Gripper, Initial_To_Midway)
-
-            obj.moveWithCandy(obj,UR3e, Candy_Gripper, Midway_To_Final)
-
-            Candy_Gripper.openGripper();
-        end
-
-        function moveBlueberryUR3e(obj, UR3e, Candy_Gripper, Initial_Candy_Pose)
-            % Calculate start pose for each candy
-            Candy_Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
-            Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.1;  % Adjust height
-        
-            Midway_Waypoint = [26.2, -76.4, -281, -96.1, 90, -71] * pi / 180;
-            Final_Waypoint = [-161, -24, -360, -65.6, 90, -71] * pi / 180;
+                % Get current robot pose
+                UR3e_Pose = UR3e.model.getpos();
             
-            % Get current robot pose
-            UR3e_Pose = UR3e.model.getpos();
+                % Calculate inverse kinematics to get initial joint angles
+                Candy_Waypoint = UR3e.model.ikcon(Start_Pose);
             
-            % Calculate inverse kinematics to get initial joint angles
-            Candy_Waypoint = UR3e.model.ikcon(Candy_Start_Pose);
-        
-            % Calculate trajectories
-            Current_To_Midway = jtraj(UR3e_Pose, Midway_Waypoint, 30);
-            Midway_To_Initial = jtraj(Midway_Waypoint, Candy_Waypoint, 30);
-            Initial_To_Midway = jtraj(Candy_Waypoint, Midway_Waypoint, 30);
-            Midway_To_Final = jtraj(Midway_Waypoint, Final_Waypoint, 30);
+                % Display joint angles
+                disp('Candy Initial Joint Angles:');
+                disp(rad2deg(Candy_Initial_Joint_Angles));
             
-            % Animate the robot for each part of the movement
-            obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Current_To_Midway)
+                Current_To_First = jtraj(UR3e_Pose, First_Waypoint, 30);
+                First_To_Initial = jtraj(First_Waypoint, Candy_Waypoint, 30);
+                Initial_To_First = jtraj(Candy_Waypoint, First_Waypoint, 30);
+                First_To_Second = jtraj(First_Waypoint, Second_Waypoint, 30);
+                Second_To_Final = jtraj(Second_Waypoint, Final_Waypoint, 30);
+                Final_To_Second = jtraj(Final_Waypoint, Second_Waypoint, 30);
+       
+                % Animate the robot for each part of the movement
+                obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Current_To_First)
+    
+                obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, First_To_Initial)
+    
+                Candy_Gripper.closeGripper();
+    
+                % move robot towards LBRiiwa
+                obj.moveWithCandy(obj,UR3e, Candy_Gripper, Initial_To_First)
+    
+                obj.moveWithCandy(obj,UR3e, Candy_Gripper, First_To_Second)
 
-            obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Midway_To_Initial)
+                obj.moveWithCandy(obj,UR3e, Candy_Gripper, Second_To_Final)
+    
+                Candy_Gripper.openGripper();
 
-            Candy_Gripper.closeGripper();
-
-            % move robot towards LBRiiwa
-            obj.moveWithCandy(obj,UR3e, Candy_Gripper, Initial_To_Midway)
-
-            obj.moveWithCandy(obj,UR3e, Candy_Gripper, Midway_To_Final)
-
-            Candy_Gripper.openGripper();
-        end
-
-        function moveGreenappleUR3e(obj, UR3e, Candy_Gripper, Initial_Candy_Pose)
-            % Calculate start pose for each candy
-            Candy_Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
-            Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.1;  % Adjust height
-        
-            Midway_Waypoint = [26.2, -76.4, -281, -96.1, 90, -71] * pi / 180;
-            Final_Waypoint = [-161, -24, -360, -65.6, 90, -71] * pi / 180;
-            
-            % Get current robot pose
-            UR3e_Pose = UR3e.model.getpos();
-            
-            % Calculate inverse kinematics to get initial joint angles
-            Candy_Waypoint = UR3e.model.ikcon(Candy_Start_Pose);
-        
-            % Calculate trajectories
-            Current_To_Midway = jtraj(UR3e_Pose, Midway_Waypoint, 30);
-            Midway_To_Initial = jtraj(Midway_Waypoint, Candy_Waypoint, 30);
-            Initial_To_Midway = jtraj(Candy_Waypoint, Midway_Waypoint, 30);
-            Midway_To_Final = jtraj(Midway_Waypoint, Final_Waypoint, 30);
-            
-            % Animate the robot for each part of the movement
-            obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Current_To_Midway)
-
-            obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Midway_To_Initial)
-
-            Candy_Gripper.closeGripper();
-
-            % move robot towards LBRiiwa
-            obj.moveWithCandy(obj,UR3e, Candy_Gripper, Initial_To_Midway)
-
-            obj.moveWithCandy(obj,UR3e, Candy_Gripper, Midway_To_Final)
-
-            Candy_Gripper.openGripper();
-        end
-
-        function moveUR3e(obj, UR3e, Candy_Gripper, Initial_Candy_Pose)
-
-            % Make it so that the end effector grips the Candy from the side
-            Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
-            Final_Pose = % Edit the final pose where Candy is dropped onto box
-
-            % Get the necessary robot poses
-            UR3e_Pose = UR3e.model.getpos();
-            Initial_Joint_Angles = UR3e.model.ikcon(Start_Pose);
-            Final_Joint_Angles = UR3e.model.ikcon(Final_Pose);
-
-            % Calculate the trajectories
-            Current_To_Initial = jtraj(UR3e_Pose, Initial_Joint_Angles, 30);
-            Initial_To_Final = jtraj(Initial_Joint_Angles, Final_Joint_Angles, 30);        
-
-            % move robot from current pose to pick up Candy
-            obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Current_To_Initial)
-
-            Candy_Gripper.closeGripper();
-
-            % move robot towards LBRiiwa
-            obj.moveWithCandy(obj,UR3e, Candy_Gripper, Initial_To_Final)
-
-            Candy_Gripper.openGripper();
+                obj.moveWithoutCandy(obj,UR3e, Candy_Gripper, Final_To_Second)
         end
 
 
