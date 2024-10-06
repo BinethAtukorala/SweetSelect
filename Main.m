@@ -44,24 +44,24 @@ end
 
 % Place candies
 Raspberry = [ 
-    1.21, 0.7, 0.6;
-    1.21, 0.75, 0.6;
-    1.21, 0.85, 0.6;
+    0.5, 1.6, 0.8;
+    0.56, 1.6, 0.8;
+    0.62, 1.6, 0.8;
+    0.68, 1.6, 0.8;
 ];
 
 Blueberry = [                                         
-    1.15, 1, 0.6;
-    1.15, 1.05, 0.6;
-    1.15, 1.1, 0.6;
-    1.15, 1.15, 0.6;
+    0.74, 1.6, 0.8;
+    0.80, 1.6, 0.8;
+    0.74, 1.54, 0.8;
+    0.80, 1.54, 0.8;
 ];
 Greenapple = [                                         
-    1.21, 0.9, 0.6;
-    1.21, 0.95, 0.6;
-    1.21, 1, 0.6;
-    1.21, 1.05, 0.6;
+    0.5, 1.54, 0.8;
+    0.56, 1.54, 0.8;
+    0.62, 1.54, 0.8;
+    0.68, 1.54, 0.8;
 ];
-
 
 Raspberry_Candy = [];
 
@@ -81,36 +81,13 @@ for i = 1:size(Raspberry, 1)
     Greenapple_Candy = [Greenapple_Candy, CandyClass(Greenapple_Candy(i, :),"Greenapple")];
 end
 
-% Place dummy candy
-Dummy_Raspberry = [ 
-    1.21, 0.8, 0.6;
+Candy_Final_Poses = [                                         
+0.48, 1, 0.95;
+0.54, 1, 0.95;
+0.60, 1, 0.95;
 ];
 
-Dummy_Blueberry = [                                         
-    1.15, 0.7, 0.6;
-    1.15, 0.75, 0.6;
-    1.15, 0.8, 0.6;
-    1.15, 0.85, 0.6;
-    1.15, 0.9, 0.6;
-    1.15, 0.95, 0.6;
-];
-Dummy_Greenapple = [                                         
-    1.21, 1.1, 0.6;
-    1.21, 1.15, 0.6;
-];
-
-for i = 1:size(Dummy_Raspberry, 1)
-    PlaceObject('candyballraspberry.ply', Dummy_Raspberry(i, :));
-end
-
-for i = 1:size(Dummy_Blueberry, 1)
-    PlaceObject('candyballblueberry.ply', Dummy_Blueberry(i, :));
-end
-
-for i = 1:size(Dummy_Greenapple, 1)
-    PlaceObject('candyballgreenapple.ply', Dummy_Greenapple(i, :));
-end
-
+Candy_Final_Poses(:,3) = Candy_Final_Poses(:,3) + 0.1;
 
 % Keep grippers open initially
 Box_Gripper.openGripper();
