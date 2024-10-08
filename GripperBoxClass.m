@@ -40,8 +40,8 @@ classdef GripperBoxClass
 
         function closeGripper(obj)
             % Trajectories for fingers to move away from each other
-            Right_Trajectory = jtraj(obj.Box_Right_Finger.model.getpos(), [0, pi/16], 50);
-            Left_Trajectory = jtraj(obj.Box_Left_Finger.model.getpos(), [0, -pi/16], 50);
+            Right_Trajectory = jtraj(obj.Box_Right_Finger.model.getpos(), [0, -pi/16], 50);
+            Left_Trajectory = jtraj(obj.Box_Left_Finger.model.getpos(), [0, pi/16], 50);
             for i = 1:size(Right_Trajectory, 1)
                 % Animate right finger
                 obj.Box_Right_Finger.model.animate(Right_Trajectory(i, :));
