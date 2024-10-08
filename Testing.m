@@ -1,10 +1,10 @@
 hold on;
 clear all
-addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/Environment')
-addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/LBRiiwa')
-addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/UR3e')
-addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/GripperBox')
-addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/GripperCandy')
+addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/Environment')
+addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/LBRiiwa')
+addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/UR3e')
+addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/GripperBox')
+addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/GripperCandy')
 
 % Setting the limits for the x, y, and z axes
 xlim([-2, 2]);                                              
@@ -160,6 +160,8 @@ UR3e = UR3e(transl(0.94, 1.25, 0.8));
 Candy_Right_Finger = GripperCandyRight(transl([0, 0, 0]));
 Candy_Left_Finger = GripperCandyLeft(transl([0, 0, 0]));
 
+OpenGripper(UR3e, Candy_Right_Finger, Candy_Left_Finger, [0, 8*pi/25], [0, -8*pi/25]);
+
 Midway_Pose_Joint_Angles = [180, -80, 180, 18, 180, -28, 90] * pi / 180;
 LBRiiwa.model.animate(Midway_Pose_Joint_Angles);
 drawnow();
@@ -183,13 +185,13 @@ Candy_Final_Poses = [
 
 % Candy_Final_Poses(:,3) = Candy_Final_Poses(:,3) + 0.2;
 
-Candy_Final_Poses(:,3) = Candy_Final_Poses(:,3) + 0.1;
+Candy_Final_Poses(:,3) = Candy_Final_Poses(:,3) + 0.08;
 
 
 for i = 1:NumRed
     % Calculate start pose for each candy
     Candy_Start_Pose = [eye(3), Raspberry(i, :)'; 0, 0, 0, 1] * trotx(pi);
-    Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.1;  % Adjust height
+    Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.08;  % Adjust height
 
 
     % Determine which final candy pose to use, repeating if i > 3
@@ -220,6 +222,8 @@ for i = 1:NumRed
     Candy_Final_To_Second = jtraj(Candy_Final_Waypoint,  Candy_Second_Waypoint, 30);
 
     % Animate the robot for each part of the movement
+
+
     for j = 1:size(Candy_Current_To_First, 1)
         UR3e.model.animate(Candy_Current_To_First(j,:));
         drawnow();
@@ -233,6 +237,8 @@ for i = 1:NumRed
         pause(0.01);
         stationary(UR3e, Candy_Right_Finger, Candy_Left_Finger)
     end
+
+    CloseGripper(UR3e, Candy_Right_Finger, Candy_Left_Finger, [0, deg2rad(35)], [0, -deg2rad(35)]);
 
     for j = 1:size(Candy_Initial_To_First, 1)
         UR3e.model.animate(Candy_Initial_To_First(j,:));
@@ -254,6 +260,8 @@ for i = 1:NumRed
         pause(0.01);
         stationary(UR3e, Candy_Right_Finger, Candy_Left_Finger)
     end
+
+    OpenGripper(UR3e, Candy_Right_Finger, Candy_Left_Finger, [0, 8*pi/25], [0, -8*pi/25]);
 
     for j = 1:size(Candy_Final_To_Second, 1)
         UR3e.model.animate(Candy_Final_To_Second(j,:));
