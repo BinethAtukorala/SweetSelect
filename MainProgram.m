@@ -24,6 +24,13 @@ classdef MainProgram
             obj.r.model.animate(q);
         end
 
+        function [tr, rpy] = getTrAndRPY(obj, q)
+            tr = obj.r.model.fkine(q);
+            rpy = tr2rpy(tr);
+            tr = tr.t
+        end
+
+
     end
 
 end
