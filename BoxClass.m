@@ -12,10 +12,10 @@ classdef BoxClass
             obj.Vertices = get(obj.Box_Object, 'Vertices');
         end
         
-        function updateBoxPosition(obj, Transformation, Vertices)
+        function updateBoxPosition(obj, Transformation)
             % Applies the transformation to the original vertices to compute new positions
             % The transformation consists of both rotation (1:3, 1:3) and translation (1:3, 4)
-            New_Vertices = (Transformation(1:3, 1:3) * Vertices' + Transformation(1:3, 4))';
+            New_Vertices = (Transformation(1:3, 1:3) * obj.Vertices' + Transformation(1:3, 4))';
             set(obj.Box_Object, 'Vertices', New_Vertices);
         end
     end
