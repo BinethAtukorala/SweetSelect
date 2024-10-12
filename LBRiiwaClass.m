@@ -1,13 +1,13 @@
 classdef LBRiiwaClass
     properties
-        Robot_LBRiiwa % Property to store the robot object model
+        LBRiiwa % Property to store the robot object model
     end
 
     methods
         function obj = LBRiiwaClass()
             % Initialize the robot model LBRiiwa
             % The robot is placed at a translational offset on top of the table
-            obj.Robot_LBRiiwa  = LBRiiwa(transl([-0.3, 1, 0.5]));
+            obj.LBRiiwa  = LBRiiwa(transl([-0.3, 1, 0.5]));
         end
 
         function moveFrontToMidway(obj, LBRiiwa, Box_Gripper, Initial_Box_Pose, Box)
@@ -18,8 +18,8 @@ classdef LBRiiwaClass
             Start_Pose(3,4) = Start_Pose(3,4) + 0.04;
 
             % Get the necessary robot poses
-            LBRiiwa_Pose = LBRiiwa.model.getpos();
-            Box_Waypoint = LBRiiwa.model.ikcon(Start_Pose);
+            LBRiiwa_Pose = obj.LBRiiwa.model.getpos();
+            Box_Waypoint = obj.LBRiiwa.model.ikcon(Start_Pose);
             Box_Waypoint(1,7) = Box_Waypoint(1,7) + deg2rad(90);
 
             % Waypoints for front column of boxes
@@ -33,16 +33,16 @@ classdef LBRiiwaClass
             First_To_Midway = jtraj(Front_First_Waypoint, Front_Midway_Waypoint, 50);
 
             % move robot from current pose to pick up box
-            obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, Current_To_First)
+            obj.moveWithoutBox(LBRiiwa, Box_Gripper, Current_To_First)
            
-            obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, First_To_Initial)
+            obj.moveWithoutBox(LBRiiwa, Box_Gripper, First_To_Initial)
 
             Box_Gripper.closeGripper();
 
             % move robot from intial pose towards UR3
-            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Initial_To_First, Box, Start_Pose)
+            obj.moveWithBox(LBRiiwa, Box_Gripper, Initial_To_First, Box, Start_Pose)
 
-            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, First_To_Midway, Box, Start_Pose)
+            obj.moveWithBox(LBRiiwa, Box_Gripper, First_To_Midway, Box, Start_Pose)
 
         end
 
@@ -61,13 +61,13 @@ classdef LBRiiwaClass
             Final_To_Second = jtraj(Front_Final_Waypoint, Front_Second_Waypoint, 100);
 
             % move robot from UR3 towards counter
-            obj.moveWithFilledBox(obj,LBRiiwa, Box_Gripper, Midway_To_Second, Box, Start_Pose)
+            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Midway_To_Second, Box, Start_Pose)
 
-            obj.moveWithFilledBox(obj,LBRiiwa, Box_Gripper, Second_To_Final, Box, Start_Pose)
+            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Second_To_Final, Box, Start_Pose)
 
             Box_Gripper.openGripper();
 
-            obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, Final_To_Second)
+            obj.moveWithoutBox(LBRiiwa, Box_Gripper, Final_To_Second)
 
         end
 
@@ -79,8 +79,8 @@ classdef LBRiiwaClass
             Start_Pose(3,4) = Start_Pose(3,4) + 0.1;
 
             % Get the necessary robot poses
-            LBRiiwa_Pose = LBRiiwa.model.getpos();
-            Box_Waypoint = LBRiiwa.model.ikcon(Start_Pose);
+            LBRiiwa_Pose = obj.LBRiiwa.model.getpos();
+            Box_Waypoint = obj.LBRiiwa.model.ikcon(Start_Pose);
             Box_Waypoint(1,7) = Box_Waypoint(1,7) + deg2rad(90);
 
             % Waypoints for back column of boxes
@@ -94,16 +94,16 @@ classdef LBRiiwaClass
             First_To_Midway = jtraj(Back_First_Waypoint, Back_Midway_Waypoint, 100);
 
             % move robot from current pose to pick up box
-            obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, Current_To_First)
+            obj.moveWithoutBox(LBRiiwa, Box_Gripper, Current_To_First)
 
-            obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, First_To_Initial)
+            obj.moveWithoutBox(LBRiiwa, Box_Gripper, First_To_Initial)
 
             Box_Gripper.closeGripper();
 
             % move robot from intial pose towards UR3
-            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, Initial_To_First, Box, Start_Pose)
+            obj.moveWithBox(LBRiiwa, Box_Gripper, Initial_To_First, Box, Start_Pose)
 
-            obj.moveWithBox(obj,LBRiiwa, Box_Gripper, First_To_Midway, Box, Start_Pose)
+            obj.moveWithBox(LBRiiwa, Box_Gripper, First_To_Midway, Box, Start_Pose)
 
         end
 
@@ -122,13 +122,13 @@ classdef LBRiiwaClass
             Final_To_Second = jtraj(Back_Final_Waypoint, Back_Second_Waypoint, 100);
 
             % move robot from UR3 towards counter
-            obj.moveWithFilledBox(obj,LBRiiwa, Box_Gripper, Midway_To_Second, Box, Start_Pose)
+            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Midway_To_Second, Box, Start_Pose)
 
-            obj.moveWithFilledBox(obj,LBRiiwa, Box_Gripper, Second_To_Final, Box, Start_Pose)
+            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Second_To_Final, Box, Start_Pose)
 
             Box_Gripper.openGripper();
 
-            obj.moveWithoutBox(obj,LBRiiwa, Box_Gripper, Final_To_Second)
+            obj.moveWithoutBox(LBRiiwa, Box_Gripper, Final_To_Second)
 
         end
 
@@ -137,10 +137,10 @@ classdef LBRiiwaClass
 
             for i = 1:size(Trajectory, 1)
                 % Animate robot movement
-                LBRiiwa.model.animate(Trajectory(i,:));
+                obj.LBRiiwa.model.animate(Trajectory(i,:));
               
                 % Get current end effector pose
-                EndEffector_Pose = LBRiiwa.model.fkine(LBRiiwa.model.getpos()).T;
+                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T;
                 
                 % Update gripper base to be at the end effector pose
                 Box_Gripper.setGripperBase(EndEffector_Pose);
@@ -165,10 +165,10 @@ classdef LBRiiwaClass
 
             for i = 1:size(Trajectory, 1)
                 % Animate robot movement
-                LBRiiwa.model.animate(Trajectory(i,:));
+                obj.LBRiiwa.model.animate(Trajectory(i,:));
               
                 % Get current end effector pose
-                EndEffector_Pose = LBRiiwa.model.fkine(LBRiiwa.model.getpos()).T;
+                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T;
                 
                 % Update gripper base to be at the end effector pose
                 Box_Gripper.setGripperBase(EndEffector_Pose);
@@ -194,10 +194,10 @@ classdef LBRiiwaClass
 
             for i = 1:size(Trajectory, 1)
                 % Animate robot movement
-                LBRiiwa.model.animate(Trajectory(i,:));
+                obj.LBRiiwa.model.animate(Trajectory(i,:));
               
                 % Get current end effector pose
-                EndEffector_Pose = LBRiiwa.model.fkine(LBRiiwa.model.getpos()).T;
+                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T;
                 
                 % Update gripper base to be at the end effector pose
                 Box_Gripper.setGripperBase(EndEffector_Pose);
