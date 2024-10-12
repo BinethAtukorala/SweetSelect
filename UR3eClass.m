@@ -52,11 +52,11 @@ classdef UR3eClass
                 Candy_Gripper.closeGripper();
     
                 % move robot towards LBRiiwa
-                obj.moveWithCandy(obj,UR3e, Candy_Gripper, Initial_To_First)
+                obj.moveWithCandy(obj,UR3e, Candy_Gripper, Initial_To_First, Candy, Start_Pose)
     
-                obj.moveWithCandy(obj,UR3e, Candy_Gripper, First_To_Second)
+                obj.moveWithCandy(obj,UR3e, Candy_Gripper, First_To_Second, Candy, Start_Pose)
 
-                obj.moveWithCandy(obj,UR3e, Candy_Gripper, Second_To_Final)
+                obj.moveWithCandy(obj,UR3e, Candy_Gripper, Second_To_Final, Candy, Start_Pose)
     
                 Candy_Gripper.openGripper();
 
