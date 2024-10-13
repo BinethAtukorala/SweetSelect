@@ -1,3 +1,4 @@
+clear all;
 hold on
 xlim([-2, 2]);                                              
 ylim([-2, 2]);
@@ -12,17 +13,28 @@ addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/Grippe
 % Create an instance of the EnvironmentClass, representing the environment
 Environment = EnvironmentClass();
 
-% Create an instance of the LBRiiwaClass, representing the LBRiiwa model
-LBRiiwa = LBRiiwaClass();
-
-% Create an instance of the UR3Class, representing the UR3 model
-UR3e = UR3eClass();
-
 % Create an instance of the GripperBox class, representing the box gripper for handling boxes
 Box_Gripper = GripperBoxClass();
 
 % Create an instance of the GripperBox class, representing the candy gripper for handling candies
 Candy_Gripper = GripperCandyClass();
+
+% Create an instance of the LBRiiwaClass, representing the LBRiiwa model
+LBRiiwa = LBRiiwaClass(Box_Gripper);
+
+% Create an instance of the UR3Class, representing the UR3 model
+UR3e = UR3eClass(Candy_Gripper);
+
+% % Place grippers on robot end effectors
+% LBRiiwa_EndEffector_Pose = LBRiiwa.model.fkine(LBRiiwa.model.getpos()).T;
+% Box_Gripper.setGripperBase(LBRiiwa_EndEffector_Pose);
+% 
+% UR3e_EndEffector_Pose = UR3e.model.fkine(UR3e.model.getpos()).T;
+% Box_Gripper.setGripperBase(UR3e_EndEffector_Pose);
+
+% Keep grippers open initially
+Box_Gripper.openGripper();
+Candy_Gripper.openGripper();
 
 %% Candy
 Raspberry = [ 
@@ -112,7 +124,7 @@ elseif Num_Boxes > 2
         Box_Initial_Poses = [Box_Initial_Poses; Front_Box_Poses(a, :)]
     end
 
-    for b = 1:(size(Num_Boxes) - 2)
+    for b = 1:(Num_Boxes - 2)
         Boxes = [Boxes, BoxClass(Back_Box_Poses(b, :))];
         Box_Initial_Poses = [Box_Initial_Poses; Back_Box_Poses(b, :)]
     end
@@ -120,18 +132,44 @@ end
 
 %% Movement
 
-Num_Candies = size(Candy_Initial_Poses, 1); % Get the total number of candies
 
-% Loop through all candies
-for x = 1:Num_Candies
-    % Determine the box index based on the current candy index
-    Box_Index = ceil(x / 3); % This will give 1 for x=1,2,3; 2 for x=4,5,6; etc.
-    
-    % Move the LBRiiwa and UR3e based on the current box index and candy position
-    LBRiiwa.moveFrontToMidway(LBRiiwa, Box_Gripper, Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
-    UR3e.moveUR3e(UR3e, Candy_Gripper, Candy_Initial_Poses(x,:), Candy_Final_Poses, Candies(x,:));
-    LBRiiwa.moveFrontFromMidway(obj, LBRiiwa, Box_Gripper, Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
+% Get the total number of candies
+Num_Candies = size(Candy_Initial_Poses, 1);
+
+% Iterate through the boxes
+for Box_Index = 1:Num_Boxes
+    % Determine the candy indices for this box
+    Start_Index = (Box_Index - 1) * 3 + 1;
+    End_Index = min(Box_Index * 3, Num_Candies);
+
+    if Box_Index <= 2
+
+        [Box_Start_Pose] = LBRiiwa.moveFrontToMidway(LBRiiwa, Box_Gripper, Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
+        Candy_Start_Poses = [];
+
+        for x = Start_Index:End_Index
+            [Candy_Start_Pose] = UR3e.moveUR3e(UR3e, Candy_Gripper, Candy_Initial_Poses(x,:), Candy_Final_Poses, Candies(x), x);
+            Candy_Start_Poses = [Candy_Start_Poses; Candy_Start_Pose];
+        end
+
+        LBRiiwa.moveFrontFromMidway(LBRiiwa, Box_Gripper, Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
+
+    else
+
+        [Box_Start_Pose] = LBRiiwa.moveBackToMidway(LBRiiwa, Box_Gripper, Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
+        Candy_Start_Poses = [];
+
+        for x = Start_Index:End_Index
+            [Candy_Start_Pose] = UR3e.moveUR3e(UR3e, Candy_Gripper, Candy_Initial_Poses(x,:), Candy_Final_Poses, Candies(x), x);
+            Candy_Start_Poses = [Candy_Start_Poses; Candy_Start_Pose];
+        end
+
+        LBRiiwa.moveBackFromMidway(LBRiiwa, Box_Gripper, Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
+
+    end
 end
+
+
 
 % if size(Candy_Initial_Poses) <= 3
 %     for z = 1:size(Candy_Initial_Poses)
@@ -198,7 +236,4 @@ end
 %     end
 % end
 
-% Keep grippers open initially
-Box_Gripper.openGripper();
-Candy_Gripper.openGripper();
 
