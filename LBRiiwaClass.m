@@ -17,7 +17,7 @@ classdef LBRiiwaClass
 
             % Make it so that the end effector grips the box from the side
             Start_Pose = [eye(3), Initial_Box_Pose'; 0, 0, 0, 1] * troty(-pi/2);
-            Start_Pose(1,4) = Start_Pose(1,4) + 0.19;
+            Start_Pose(1,4) = Start_Pose(1,4) + 0.18;
             Start_Pose(3,4) = Start_Pose(3,4) + 0.04;
 
             % Get the necessary robot poses
@@ -79,8 +79,8 @@ classdef LBRiiwaClass
 
             % Make it so that the end effector grips the box from the side
             Start_Pose = [eye(3), Initial_Box_Pose'; 0, 0, 0, 1] * troty(-pi/2);
-            Start_Pose(1,4) = Start_Pose(1,4) + 0.19;
-            Start_Pose(3,4) = Start_Pose(3,4) + 0.1;
+            Start_Pose(1,4) = Start_Pose(1,4) + 0.18;
+            Start_Pose(3,4) = Start_Pose(3,4) + 0.04;
 
             % Get the necessary robot poses
             LBRiiwa_Pose = obj.LBRiiwa.model.getpos();
@@ -172,7 +172,7 @@ classdef LBRiiwaClass
                 obj.LBRiiwa.model.animate(Trajectory(i,:));
               
                 % Get current end effector pose
-                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T;
+                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T
                 
                 % Update gripper base to be at the end effector pose
                 Box_Gripper.setGripperBase(EndEffector_Pose);
@@ -181,28 +181,37 @@ classdef LBRiiwaClass
                 Box_Gripper.stationaryGripper();
 
                 % Calculate the transformation of the box and update its position
-                Box_Transformation = EndEffector_Pose * inv(Box_Start_Pose);
+                Box_Transformation = EndEffector_Pose * inv(Box_Start_Pose)
                 Box.updateBoxPosition(Box_Transformation);
 
                 % Calculate the transformation of the brick and update its position
-
-                % Candy_Transformation = EndEffector_Pose * inv(Candy_Start_Poses(x,:));
-                % Candies(x,:).updateCandyPosition(Candy_Transformation);
-
-                for x = 1:3
+                for x = 1:size(Candies, 2)
                     % Determine the starting and ending indices for inv()
                     Start_Index = (x - 1) * 4 + 1;  % 1, 5, 9
                     End_Index = Start_Index + 3;    % 4, 8, 12 (inclusive)
-                    
-                    % Use the range to extract the corresponding rows for inv()
-                    Candy_Transformation = EndEffector_Pose * inv(Candy_Start_Poses(Start_Index:End_Index, :));
+
+                    % Create a copy of the Candy_Start_Poses to apply offsets
+                    Adjusted_Candy_Start_Poses = Candy_Start_Poses(Start_Index:End_Index, :)
+                
+                    % Apply specific offsets based on the candy index
+                    if x == 1
+                        Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.065;  % Offset for the first candy
+                    elseif x == 2
+                        Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.125;  % Offset for the second candy
+                    elseif x == 3
+                        Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.185;  % Offset for the third candy
+                    end
+                
+                    % Use the adjusted starting poses to calculate the Candy_Transformation
+                    Candy_Transformation = EndEffector_Pose * inv(Adjusted_Candy_Start_Poses);
+                
+                    % Update the candy position using the transformed matrix
                     Candies(x).updateCandyPosition(Candy_Transformation);
                 end
-                
+
                 drawnow();
                 pause(0);
             end
-
         end
 
         function moveWithoutBox(obj, LBRiiwa, Box_Gripper, Trajectory)
