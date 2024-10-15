@@ -19,7 +19,7 @@ classdef UR3eClass
 
                 % Calculate start pose for each candy
                 Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
-                Start_Pose(3,4) = Start_Pose(3,4) + 0.1;  % Adjust height
+                Start_Pose(3,4) = Start_Pose(3,4) + 0.09;  % Adjust height
             
                 % Determine which final candy pose to use, repeating if i > 3
                 % Change the i here to the array index of total candy
