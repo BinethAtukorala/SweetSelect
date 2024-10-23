@@ -5,6 +5,18 @@
 %% UR3e
 
 clear all;
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/UR3e')
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/GripperCandy')
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/Environment')
+
+Candy_Gripper = GripperCandyClass();
+
+surf([-1, -1; 1, 1], ...               % X coordinates
+     [-1, 1; -1, 1], ...               % Y coordinates
+     [0, 0; 0, 0], ...                 % Z coordinates 
+     'CData', imread('pinkfloor.jpg'), ...            
+     'FaceColor', 'texturemap');     
+
 % Load the box object and get its vertices
 [box_faces, box_vertices, ~] = plyread('box.ply', 'tri');
 box_position = [0, 0.4, 0];  % Position of the box
@@ -27,6 +39,9 @@ radius = max_distance + 0.2;  % Sphere radius is max distance + 0.1
 
 % Initialize the UR3e robot
 UR3e = UR3e(transl(0, 0, 0));  % Set the initial base transform
+
+UR3e_EndEffector_Pose = UR3e.model.fkine(UR3e.model.getpos()).T;
+Candy_Gripper.setGripperBase(UR3e_EndEffector_Pose);
 
 initial_joint_angles = deg2rad([0, -40, 40, -90, -90, 0]);
 UR3e.model.animate(initial_joint_angles); 
@@ -68,6 +83,12 @@ q_traj = jtraj(q_start, q_target, t);  % Generate joint trajectory
 % Move Robot along the trajectory
 for i = 1:size(q_traj, 1)
     UR3e.model.animate(q_traj(i, :));  % Animate the UR3e robot
+
+    UR3e_EndEffector_Pose = UR3e.model.fkine(UR3e.model.getpos()).T;
+    Candy_Gripper.setGripperBase(UR3e_EndEffector_Pose);
+
+    Candy_Gripper.stationaryGripper();
+
     drawnow();
     pause(0.1);
 
