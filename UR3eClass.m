@@ -28,7 +28,8 @@ classdef UR3eClass
                 Final_Pose = [eye(3), Candy_Final_Pose'; 0, 0, 0, 1] * trotx(pi);
                 Final_Waypoint = obj.UR3e.model.ikcon(Final_Pose);
             
-                First_Waypoint = [-68, -11, -34, -45, -90, 36] * pi / 180;
+                % First_Waypoint = [-68, -11, -34, -45, -90, 36] * pi / 180;
+                First_Waypoint = [-58, -39.2, -34, -16.2, -90, 36] * pi / 180;
                 Second_Waypoint = [16, -26, -50, -14, -90, 106] * pi / 180;
             
                 % Get current robot pose
