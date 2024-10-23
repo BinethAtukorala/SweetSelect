@@ -1,20 +1,20 @@
 clear all;
 hold on
 xlim([-2, 2]);                                              
-ylim([-2, 3]);
+ylim([-2, 2.5]);
 zlim([0, 2]);
 
-% addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/Environment')
-% addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/LBRiiwa')
-% addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/UR3e')
-% addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/GripperBox')
-% addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/GripperCandy')
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/Environment')
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/LBRiiwa')
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/UR3e')
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/GripperBox')
+addpath('/Users/bihansudusinghe/Documents/MATLAB/Assignment 2/SweetSelect/GripperCandy')
 
-addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/Environment')
-addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/LBRiiwa')
-addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/UR3e')
-addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/GripperBox')
-addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/GripperCandy')
+% addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/Environment')
+% addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/LBRiiwa')
+% addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/UR3e')
+% addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/GripperBox')
+% addpath('/Users/binadasudusinghe/Documents/MATLAB/LABASSESSMENT2/SweetSelect/GripperCandy')
 
 
 
@@ -78,13 +78,13 @@ Candy_Gripper.openGripper();
 %     0.68, 1.54, 0.8;
 % ];
 
-Raspberry_Jar = PlaceObject('candyJar.ply', [0.5, 1.6, 0.8]);
-Greenapple_Jar = PlaceObject('candyJar.ply', [0.65, 1.6, 0.8;]);
-Blueberry_Jar = PlaceObject('candyJar.ply', [0.8, 1.6, 0.8;]);
+% Raspberry_Jar = PlaceObject('candyJar.ply', [0.5, 1.6, 0.8]);
+% Greenapple_Jar = PlaceObject('candyJar.ply', [0.65, 1.6, 0.8;]);
+% Blueberry_Jar = PlaceObject('candyJar.ply', [0.8, 1.6, 0.8;]);
 
 Raspberry_Pose = [0.5, 1.6, 0.9]; 
-Greenapple_Pose = [0.66, 1.6, 0.9];  
-Blueberry_Pose = [0.82, 1.6, 0.9];   
+Blueberry_Pose = [0.66, 1.6, 0.9];  
+Greenapple_Pose = [0.82, 1.6, 0.9];   
 
 % Edit candy count here
 Raspberry_Count = 2;
