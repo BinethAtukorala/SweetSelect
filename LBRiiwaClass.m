@@ -172,7 +172,7 @@ classdef LBRiiwaClass
                 obj.LBRiiwa.model.animate(Trajectory(i,:));
               
                 % Get current end effector pose
-                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T
+                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T;
                 
                 % Update gripper base to be at the end effector pose
                 Box_Gripper.setGripperBase(EndEffector_Pose);
@@ -181,7 +181,7 @@ classdef LBRiiwaClass
                 Box_Gripper.stationaryGripper();
 
                 % Calculate the transformation of the box and update its position
-                Box_Transformation = EndEffector_Pose * inv(Box_Start_Pose)
+                Box_Transformation = EndEffector_Pose * inv(Box_Start_Pose);
                 Box.updateBoxPosition(Box_Transformation);
 
                 % Calculate the transformation of the brick and update its position
@@ -191,18 +191,18 @@ classdef LBRiiwaClass
                     End_Index = Start_Index + 3;    % 4, 8, 12 (inclusive)
 
                     % Create a copy of the Candy_Start_Poses to apply offsets
-                    Adjusted_Candy_Start_Poses = Candy_Start_Poses(Start_Index:End_Index, :)
+                    Adjusted_Candy_Start_Poses = Candy_Start_Poses(Start_Index:End_Index, :);
                 
                     % Apply specific offsets based on the candy index
                     if x == 1
                         Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.065;  % Offset for the first candy
-                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) + 0.03;  % Offset for the first candy
+                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) - 0.022;  % Offset for the first candy
                     elseif x == 2
                         Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.125;  % Offset for the second candy
-                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) + 0.03;  % Offset for the first candy
+                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) - 0.022;  % Offset for the first candy
                     elseif x == 3
                         Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.185;  % Offset for the third candy
-                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) + 0.03;  % Offset for the first candy
+                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) - 0.022;  % Offset for the first candy
                     end
                 
                     % Use the adjusted starting poses to calculate the Candy_Transformation
