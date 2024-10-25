@@ -1,9 +1,9 @@
 classdef MainProgram < handle
     properties
         r % Property to store the robot object model
-        Raspberry % Poses for raspberry
-        Blueberry % Poses for blueberry
-        Greenapple % Poses for green apple
+        Raspberry_Pose % Poses for raspberry
+        Blueberry_Pose % Poses for blueberry
+        Greenapple_Pose % Poses for green apple
         Environment
         Box_Gripper
         Candy_Gripper
@@ -47,25 +47,9 @@ classdef MainProgram < handle
             obj.Candy_Gripper.openGripper();
             
             %% Candy
-            obj.Raspberry = [ 
-                0.5, 1.6, 0.8;
-                0.56, 1.6, 0.8;
-                0.62, 1.6, 0.8;
-                0.68, 1.6, 0.8;
-            ];
-            
-            obj.Blueberry = [                                         
-                0.74, 1.6, 0.8;
-                0.80, 1.6, 0.8;
-                0.74, 1.54, 0.8;
-                0.80, 1.54, 0.8;
-            ];
-            obj.Greenapple = [                                         
-                0.5, 1.54, 0.8;
-                0.56, 1.54, 0.8;
-                0.62, 1.54, 0.8;
-                0.68, 1.54, 0.8;
-            ];
+            obj.Raspberry_Pose = [0.5, 1.6, 0.9]; 
+            obj.Blueberry_Pose = [0.66, 1.6, 0.9];  
+            obj.Greenapple_Pose = [0.82, 1.6, 0.9];   
 
             %% Boxes
             obj.Front_Box_Poses = [
@@ -84,9 +68,9 @@ classdef MainProgram < handle
 
         function putCandiesInBox(obj, Raspberry_Count, Blueberry_Count, Greenapple_Count)
             Candy_Initial_Poses = [
-                obj.Raspberry(1:Raspberry_Count, :);
-                obj.Blueberry(1:Blueberry_Count, :);
-                obj.Greenapple(1:Greenapple_Count, :)
+                repmat(obj.Raspberry_Pose, Raspberry_Count, 1);  
+                repmat(obj.Greenapple_Pose, Blueberry_Count, 1);  
+                repmat(obj.Blueberry_Pose, Greenapple_Count, 1)   
             ];
 
             % Initialize an empty array for the Candy objects
