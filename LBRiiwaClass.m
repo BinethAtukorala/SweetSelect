@@ -1,6 +1,7 @@
-classdef LBRiiwaClass
+classdef LBRiiwaClass < handle
     properties
         LBRiiwa % Property to store the robot object model
+        eStop % Emergency stop
     end
 
     methods
@@ -13,7 +14,7 @@ classdef LBRiiwaClass
             Box_Gripper.setGripperBase(LBRiiwa_EndEffector_Pose);
         end
 
-        function [Start_Pose] = moveFrontToMidway(obj, LBRiiwa, Box_Gripper, Initial_Box_Pose, Box)
+        function [Start_Pose] = moveFrontToMidway(obj, Box_Gripper, Initial_Box_Pose, Box)
 
             % Make it so that the end effector grips the box from the side
             Start_Pose = [eye(3), Initial_Box_Pose'; 0, 0, 0, 1] * troty(-pi/2);
@@ -36,20 +37,20 @@ classdef LBRiiwaClass
             First_To_Midway = jtraj(Front_First_Waypoint, Front_Midway_Waypoint, 50);
 
             % move robot from current pose to pick up box
-            obj.moveWithoutBox(LBRiiwa, Box_Gripper, Current_To_First)
+            obj.moveWithoutBox(Box_Gripper, Current_To_First);
            
-            obj.moveWithoutBox(LBRiiwa, Box_Gripper, First_To_Initial)
+            obj.moveWithoutBox(Box_Gripper, First_To_Initial);
 
             Box_Gripper.closeGripper();
 
             % move robot from intial pose towards UR3
-            obj.moveWithBox(LBRiiwa, Box_Gripper, Initial_To_First, Box, Start_Pose)
+            obj.moveWithBox(Box_Gripper, Initial_To_First, Box, Start_Pose);
 
-            obj.moveWithBox(LBRiiwa, Box_Gripper, First_To_Midway, Box, Start_Pose)
+            obj.moveWithBox(Box_Gripper, First_To_Midway, Box, Start_Pose);
 
         end
 
-        function moveFrontFromMidway(obj, LBRiiwa, Box_Gripper, Box, Box_Index, Candies,  Box_Start_Pose, Candy_Start_Poses)
+        function moveFrontFromMidway(obj, Box_Gripper, Box, Box_Index, Candies,  Box_Start_Pose, Candy_Start_Poses)
 
             % Waypoints
             Front_Midway_Waypoint = [180, -80, 180, 18, 180, -28, 90] * pi / 180;
@@ -65,13 +66,13 @@ classdef LBRiiwaClass
             Final_To_Second = jtraj(Front_Final_Waypoint(Box_Index,:), Front_Second_Waypoint, 50);
 
             % move robot from UR3 towards counter
-            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Midway_To_Second, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
+            obj.moveWithFilledBox(Box_Gripper, Midway_To_Second, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
 
-            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Second_To_Final, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
+            obj.moveWithFilledBox(Box_Gripper, Second_To_Final, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
 
             Box_Gripper.openGripper();
 
-            obj.moveWithoutBox(LBRiiwa, Box_Gripper, Final_To_Second)
+            obj.moveWithoutBox(Box_Gripper, Final_To_Second)
 
         end
 
@@ -111,7 +112,7 @@ classdef LBRiiwaClass
 
         end
 
-        function moveBackFromMidway(obj, LBRiiwa, Box_Gripper, Box, Box_Index, Candies, Box_Start_Pose, Candy_Start_Poses)
+        function moveBackFromMidway(obj, Box_Gripper, Box, Box_Index, Candies, Box_Start_Pose, Candy_Start_Poses)
 
             % Waypoints for back column of boxes
             Back_Midway_Waypoint = [180, -80, -180, 18, -180, -28, 90] * pi / 180;
@@ -129,18 +130,18 @@ classdef LBRiiwaClass
             Final_To_Second = jtraj(Back_Final_Waypoint(Box_Index,:), Back_Second_Waypoint, 50);
 
             % move robot from UR3 towards counter
-            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Midway_To_Second, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
+            obj.moveWithFilledBox(Box_Gripper, Midway_To_Second, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
 
-            obj.moveWithFilledBox(LBRiiwa, Box_Gripper, Second_To_Final, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
+            obj.moveWithFilledBox(Box_Gripper, Second_To_Final, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
 
             Box_Gripper.openGripper();
 
-            obj.moveWithoutBox(LBRiiwa, Box_Gripper, Final_To_Second)
+            obj.moveWithoutBox(Box_Gripper, Final_To_Second)
 
         end
 
 
-        function moveWithBox(obj, LBRiiwa, Box_Gripper, Trajectory, Box, Start_Pose)
+        function moveWithBox(obj, Box_Gripper, Trajectory, Box, Start_Pose)
 
             for i = 1:size(Trajectory, 1)
                 % Animate robot movement
@@ -165,14 +166,14 @@ classdef LBRiiwaClass
 
         end
 
-        function moveWithFilledBox(obj, LBRiiwa, Box_Gripper, Trajectory, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
+        function moveWithFilledBox(obj, Box_Gripper, Trajectory, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
 
             for i = 1:size(Trajectory, 1)
                 % Animate robot movement
                 obj.LBRiiwa.model.animate(Trajectory(i,:));
               
                 % Get current end effector pose
-                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T
+                EndEffector_Pose = obj.LBRiiwa.model.fkine(obj.LBRiiwa.model.getpos()).T;
                 
                 % Update gripper base to be at the end effector pose
                 Box_Gripper.setGripperBase(EndEffector_Pose);
@@ -181,7 +182,7 @@ classdef LBRiiwaClass
                 Box_Gripper.stationaryGripper();
 
                 % Calculate the transformation of the box and update its position
-                Box_Transformation = EndEffector_Pose * inv(Box_Start_Pose)
+                Box_Transformation = EndEffector_Pose * inv(Box_Start_Pose);
                 Box.updateBoxPosition(Box_Transformation);
 
                 % Calculate the transformation of the brick and update its position
@@ -191,7 +192,7 @@ classdef LBRiiwaClass
                     End_Index = Start_Index + 3;    % 4, 8, 12 (inclusive)
 
                     % Create a copy of the Candy_Start_Poses to apply offsets
-                    Adjusted_Candy_Start_Poses = Candy_Start_Poses(Start_Index:End_Index, :)
+                    Adjusted_Candy_Start_Poses = Candy_Start_Poses(Start_Index:End_Index, :);
                 
                     % Apply specific offsets based on the candy index
                     if x == 1
@@ -214,7 +215,7 @@ classdef LBRiiwaClass
             end
         end
 
-        function moveWithoutBox(obj, LBRiiwa, Box_Gripper, Trajectory)
+        function moveWithoutBox(obj, Box_Gripper, Trajectory)
 
             for i = 1:size(Trajectory, 1)
                 % Animate robot movement

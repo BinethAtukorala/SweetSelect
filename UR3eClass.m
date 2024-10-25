@@ -1,6 +1,8 @@
-classdef UR3eClass
+classdef UR3eClass < handle
     properties
         UR3e % Property to store the robot object model
+        Run_Status % Emergency stop
+        eStop_Hold % To confirm whether eStop was disengaged
     end
 
     methods
@@ -9,13 +11,30 @@ classdef UR3eClass
             % Initialize the robot model UR3e
             % The robot is placed at a translational offset on top of the table
             obj.UR3e  = UR3e(transl([0.94, 1.25, 0.8]));
+            obj.Run_Status = true;
+            obj.eStop_Hold = false;
 
             UR3e_EndEffector_Pose = obj.UR3e.model.fkine(obj.UR3e.model.getpos()).T;
             Candy_Gripper.setGripperBase(UR3e_EndEffector_Pose);
 
         end
 
-        function [Start_Pose] = moveUR3e(obj, UR3e, Candy_Gripper, Initial_Candy_Pose, Candy_Final_Poses, Candy, Candy_Index)
+        function pressEStop(obj)
+            if obj.Run_Status == true
+                obj.Run_Status = false;
+                obj.eStop_Hold = true;
+            elseif obj.eStop_Hold == true
+                obj.eStop_Hold = false;
+            end
+        end
+
+        function resumeOperation(obj)
+            if obj.eStop_Hold == false
+                obj.Run_Status = true;
+            end
+        end
+
+        function [Start_Pose] = moveUR3e(obj, Candy_Gripper, Initial_Candy_Pose, Candy_Final_Poses, Candy, Candy_Index)
 
                 % Calculate start pose for each candy
                 Start_Pose = [eye(3), Initial_Candy_Pose'; 0, 0, 0, 1] * trotx(pi);
@@ -45,28 +64,34 @@ classdef UR3eClass
                 Final_To_Second = jtraj(Final_Waypoint, Second_Waypoint, 20);
        
                 % Animate the robot for each part of the movement
-                obj.moveWithoutCandy(UR3e, Candy_Gripper, Current_To_First)
+                obj.moveWithoutCandy(Candy_Gripper, Current_To_First)
     
-                obj.moveWithoutCandy(UR3e, Candy_Gripper, First_To_Initial)
+                obj.moveWithoutCandy(Candy_Gripper, First_To_Initial)
     
                 Candy_Gripper.closeGripper();
     
                 % move robot towards LBRiiwa
-                obj.moveWithCandy(UR3e, Candy_Gripper, Initial_To_First, Candy, Start_Pose)
+                obj.moveWithCandy(Candy_Gripper, Initial_To_First, Candy, Start_Pose)
     
-                obj.moveWithCandy(UR3e, Candy_Gripper, First_To_Second, Candy, Start_Pose)
+                obj.moveWithCandy(Candy_Gripper, First_To_Second, Candy, Start_Pose)
 
-                obj.moveWithCandy(UR3e, Candy_Gripper, Second_To_Final, Candy, Start_Pose)
+                obj.moveWithCandy(Candy_Gripper, Second_To_Final, Candy, Start_Pose)
     
                 Candy_Gripper.openGripper();
 
-                obj.moveWithoutCandy(UR3e, Candy_Gripper, Final_To_Second)
+                obj.moveWithoutCandy(Candy_Gripper, Final_To_Second)
         end
 
 
-        function moveWithCandy(obj, UR3e, Candy_Gripper, Trajectory, Candy, Start_Pose)
+        function moveWithCandy(obj, Candy_Gripper, Trajectory, Candy, Start_Pose)
 
             for i = 1:size(Trajectory, 1)
+                
+                % Stop movement if eStop is enabled
+                if obj.eStop
+                    break
+                end
+
                 % Animate robot movement
                 obj.UR3e.model.animate(Trajectory(i,:));
               
@@ -89,9 +114,16 @@ classdef UR3eClass
 
         end
 
-        function moveWithoutCandy(obj, UR3e, Candy_Gripper, Trajectory)
+        function moveWithoutCandy(obj, Candy_Gripper, Trajectory)
 
             for i = 1:size(Trajectory, 1)
+
+                % Stop movement if eStop is enabled
+                if obj.eStop
+                    disp("BROKEN")
+                    break
+                end
+
                 % Animate robot movement
                 obj.UR3e.model.animate(Trajectory(i,:));
               
