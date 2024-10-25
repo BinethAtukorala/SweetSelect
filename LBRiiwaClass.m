@@ -19,7 +19,7 @@ classdef LBRiiwaClass < handle
             % Make it so that the end effector grips the box from the side
             Start_Pose = [eye(3), Initial_Box_Pose'; 0, 0, 0, 1] * troty(-pi/2);
             Start_Pose(1,4) = Start_Pose(1,4) + 0.18;
-            Start_Pose(3,4) = Start_Pose(3,4) + 0.04;
+            Start_Pose(3,4) = Start_Pose(3,4) + 0.05;
 
             % Get the necessary robot poses
             LBRiiwa_Pose = obj.LBRiiwa.model.getpos();
@@ -197,10 +197,13 @@ classdef LBRiiwaClass < handle
                     % Apply specific offsets based on the candy index
                     if x == 1
                         Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.065;  % Offset for the first candy
+                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) - 0.022;  % Offset for the first candy
                     elseif x == 2
                         Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.125;  % Offset for the second candy
+                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) - 0.022;  % Offset for the first candy
                     elseif x == 3
                         Adjusted_Candy_Start_Poses(3, 4) = Adjusted_Candy_Start_Poses(3, 4) + 0.185;  % Offset for the third candy
+                        Adjusted_Candy_Start_Poses(2, 4) = Adjusted_Candy_Start_Poses(2, 4) - 0.022;  % Offset for the first candy
                     end
                 
                     % Use the adjusted starting poses to calculate the Candy_Transformation
