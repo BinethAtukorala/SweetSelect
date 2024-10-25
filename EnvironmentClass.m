@@ -30,9 +30,9 @@ classdef EnvironmentClass
             Candy_Shelf_1 = PlaceObject('candyShelf.ply', [1, 2.25, 0]);
             Candy_Shelf_2 = PlaceObject('candyShelf.ply', [-1, 2.25, 0]);
             % candytray = PlaceObject('tray.ply', [0.65, 1.575, 0.8]);
-            Stage_Robot = PlaceObject('boxRobot.ply', [0.74, 1.25, 0.5]);
-            Stage_Box = PlaceObject('boxBox.ply', [-1.15, 1, 0.5]);
-            Stage_Candy = PlaceObject('boxCandy.ply', [-0.2, 0.2, 0.5]);
+            Stage_Robot = PlaceObject('stageRobot.ply', [0.74, 1.25, 0.5]);
+            Stage_Box = PlaceObject('stageBox.ply', [-1.15, 1, 0.5]);
+            Stage_Candy = PlaceObject('stageCandy.ply', [-0.2, 0.2, 0.5]);
             Credit_Card_Reader = PlaceObject('creditCardReader.ply', [-1.2, 0.1, 0.5]);
             Monitor = PlaceObject('monitor.ply', [-1.5, 0.1, 0.5]);
 
