@@ -1,4 +1,4 @@
-classdef WorkQueueItemClass
+classdef WorkQueueRobotClass
     properties
         Gripper_Status % Desired gripper position
         traj % trajectory of q angles
@@ -9,7 +9,7 @@ classdef WorkQueueItemClass
     end
     
     methods
-        function obj = WorkQueueItemClass(Gripper_Status, traj, Gripper_Has_Object, options)
+        function obj = WorkQueueRobotClass(Gripper_Status, traj, Gripper_Has_Object, options)
             arguments
                 Gripper_Status string
                 traj (:, :) double
@@ -25,7 +25,7 @@ classdef WorkQueueItemClass
             if Gripper_Has_Object > 0
                 obj.Gripper_Object = options.Gripper_Object;
                 if Gripper_Has_Object == 2
-                    obj.Gripper_Extra_Objects = options.Gripper_Extra_Objects
+                    obj.Gripper_Extra_Objects = options.Gripper_Extra_Objects;
                 end
                 obj.Gripper_Object_Start_Poses = options.Gripper_Object_Start_Poses;
             else

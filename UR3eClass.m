@@ -61,13 +61,13 @@ classdef UR3eClass < handle
 
         % Execute work queue
         function executeQueue(obj)    
-            disp("Work Queue")
-            disp(obj.Work_Queue)
+
             % For every work item
             while prod(size(obj.Work_Queue)) > 0 
+
                 % For every joint angle configuration
-                disp(size(obj.Work_Queue(1).traj))
                 while size(obj.Work_Queue(1).traj, 1) > 0
+
                     % Confirm run status
                     if obj.Run_Status == false
                         return
@@ -90,8 +90,11 @@ classdef UR3eClass < handle
                     else
                         obj.animateWithoutCandy(obj.Work_Queue(1).traj(1, :));
                     end
+
+                    % Delete trajectory performed
                     obj.Work_Queue(1).traj = obj.Work_Queue(1).traj(2:size(obj.Work_Queue(1).traj, 1), :);
                 end
+                % Delete work item performed
                 obj.Work_Queue = obj.Work_Queue(2:size(obj.Work_Queue, 1));
             end
         end
@@ -127,12 +130,12 @@ classdef UR3eClass < handle
                 Final_To_Second = jtraj(Final_Waypoint, Second_Waypoint, 20);
 
                 obj.Work_Queue = [obj.Work_Queue;
-                                    WorkQueueItemClass("open", Current_To_First, false);          
-                                    WorkQueueItemClass("open", First_To_Initial, false);     
-                                    WorkQueueItemClass("close", Initial_To_First, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);     
-                                    WorkQueueItemClass("close", First_To_Second, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);    
-                                    WorkQueueItemClass("close", Second_To_Final, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);
-                                    WorkQueueItemClass("open", Final_To_Second, false);
+                                    WorkQueueRobotClass("open", Current_To_First, false);          
+                                    WorkQueueRobotClass("open", First_To_Initial, false);     
+                                    WorkQueueRobotClass("close", Initial_To_First, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);     
+                                    WorkQueueRobotClass("close", First_To_Second, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);    
+                                    WorkQueueRobotClass("close", Second_To_Final, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);
+                                    WorkQueueRobotClass("open", Final_To_Second, false);
                                     ];
 
                 obj.executeQueue();

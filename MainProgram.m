@@ -13,6 +13,7 @@ classdef MainProgram < handle
         Back_Box_Poses
         E_Stop % Track whether emergency stop is engaged
         Run_Status % Running status of the robots
+        Work_Queue % Store robot movements to be completed
     end
 
     methods
@@ -79,12 +80,38 @@ classdef MainProgram < handle
             
 
         end
+        
+        function executeQueue(obj)
+            while prod(size(obj.Work_Queue)) > 0 
+                if obj.Work_Queue(1).Is_UR3e
+                    % Run movement for UR3e
 
-        function putCandiesInBox(obj, Raspberry_Count, Blueberry_Count, Greenapple_Count)
+                elseif obj.Work_Queue(1).Is_Front 
+                    % Run movement for LBRiiwa front
+                    if obj.Work_Queue(1).Is_To_Midway
+                        % Run movemement to midway
+                    else
+                        % Run movement from midway
+                    end
+
+                else 
+                    % Run movememnt for LBRiiwa back
+                    if obj.Work_Queue(1).Is_To_Midway
+                        % Run movemement to midway
+                    else
+                        % Run movement from midway
+                    end
+
+                end
+                obj.Work_Queue = obj.Work_Queue(2: size(obj.Work_Queue, 1));
+            end
+        end
+
+        function putCandiesInBox(obj, Raspberry_Count, Greenapple_Count, Blueberry_Count)
             Candy_Initial_Poses = [
                 repmat(obj.Raspberry_Pose, Raspberry_Count, 1);  
-                repmat(obj.Greenapple_Pose, Blueberry_Count, 1);  
-                repmat(obj.Blueberry_Pose, Greenapple_Count, 1)   
+                repmat(obj.Greenapple_Pose, Greenapple_Count, 1);  
+                repmat(obj.Blueberry_Pose, Blueberry_Count, 1)   
             ];
 
             % Initialize an empty array for the Candy objects

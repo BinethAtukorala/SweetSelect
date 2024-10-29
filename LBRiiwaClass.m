@@ -59,12 +59,11 @@ classdef LBRiiwaClass < handle
 
         % Execute work queue
         function executeQueue(obj)    
-            disp("Work Queue")
-            disp(obj.Work_Queue)
+
             % For every work item
             while prod(size(obj.Work_Queue)) > 0 
+
                 % For every joint angle configuration
-                disp(size(obj.Work_Queue(1).traj))
                 while size(obj.Work_Queue(1).traj, 1) > 0
                     % Confirm run status
                     if obj.Run_Status == false
@@ -83,7 +82,7 @@ classdef LBRiiwaClass < handle
                     end
                     
                     % Movement
-                    if obj.Work_Queue(1).Gripper_Has_Object == 2
+                    if obj.Work_Queue(1).Gripper_Has_Object == 2   % More than two objects moved by gripper (Box and Candies)
                         
                         obj.moveWithFilledBox(...
                             obj.Work_Queue(1).traj(1, :),...
@@ -92,7 +91,7 @@ classdef LBRiiwaClass < handle
                             obj.Work_Queue(1).Gripper_Object_Start_Poses(1:4, :),...
                             obj.Work_Queue(1).Gripper_Object_Start_Poses(5:size(obj.Work_Queue(1).Gripper_Object_Start_Poses, 1), :)...
                             );
-                    elseif obj.Work_Queue(1).Gripper_Has_Object == 1
+                    elseif obj.Work_Queue(1).Gripper_Has_Object == 1   % Only one object moved by gripper (Box only)
 
                         obj.moveWithBox( ...
                             obj.Work_Queue(1).traj(1, :), ...
@@ -100,11 +99,15 @@ classdef LBRiiwaClass < handle
                             obj.Work_Queue(1).Gripper_Object_Start_Poses(1:4, :) ...
                             );
 
-                    else
+                    else   % No object moved by gripper
                         obj.moveWithoutBox(obj.Work_Queue(1).traj(1, :))
                     end
+
+                    % Delete trajectory performed
                     obj.Work_Queue(1).traj = obj.Work_Queue(1).traj(2:size(obj.Work_Queue(1).traj, 1), :);
                 end
+
+                % Delete work item performed
                 obj.Work_Queue = obj.Work_Queue(2:size(obj.Work_Queue, 1));
             end
         end
@@ -137,8 +140,8 @@ classdef LBRiiwaClass < handle
             % obj.moveWithoutBox(Box_Gripper, First_To_Initial);
 
             obj.Work_Queue = [obj.Work_Queue; ...
-                                WorkQueueItemClass("open", Current_To_First, false);
-                                WorkQueueItemClass("open", First_To_Initial, false);
+                                WorkQueueRobotClass("open", Current_To_First, false);
+                                WorkQueueRobotClass("open", First_To_Initial, false);
                             ];
 
             % obj.Box_Gripper.closeGripper();
@@ -149,8 +152,8 @@ classdef LBRiiwaClass < handle
             % obj.moveWithBox(Box_Gripper, First_To_Midway, Box, Start_Pose);
 
             obj.Work_Queue = [obj.Work_Queue;
-                                WorkQueueItemClass("close", Initial_To_First, true, Gripper_Object=Box, Gripper_Object_Start_Poses=[Start_Pose]);
-                                WorkQueueItemClass("close", First_To_Midway, true, Gripper_Object=Box, Gripper_Object_Start_Poses=[Start_Pose]);
+                                WorkQueueRobotClass("close", Initial_To_First, true, Gripper_Object=Box, Gripper_Object_Start_Poses=[Start_Pose]);
+                                WorkQueueRobotClass("close", First_To_Midway, true, Gripper_Object=Box, Gripper_Object_Start_Poses=[Start_Pose]);
                             ];
 
             obj.executeQueue();
@@ -182,9 +185,9 @@ classdef LBRiiwaClass < handle
             % obj.moveWithoutBox(Box_Gripper, Final_To_Second)
 
             obj.Work_Queue = [obj.Work_Queue;
-                                WorkQueueItemClass("close", Midway_To_Second, 2, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
-                                WorkQueueItemClass("close", Second_To_Final, 2, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
-                                WorkQueueItemClass("open", Final_To_Second, false);
+                                WorkQueueRobotClass("close", Midway_To_Second, 2, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
+                                WorkQueueRobotClass("close", Second_To_Final, 2, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
+                                WorkQueueRobotClass("open", Final_To_Second, false);
                             ];
 
             obj.executeQueue();
@@ -226,9 +229,9 @@ classdef LBRiiwaClass < handle
             % obj.moveWithBox(LBRiiwa, Box_Gripper, First_To_Midway, Box, Start_Pose)
 
             obj.Work_Queue = [obj.Work_Queue;
-                                WorkQueueItemClass("open", Current_To_First, false);
-                                WorkQueueItemClass("open", First_To_Initial, false);
-                                WorkQueueItemClass("close", Initial_To_First, true, Gripper_Object=Box, Gripper_Object_Start_Poses=[Start_Pose]);
+                                WorkQueueRobotClass("open", Current_To_First, false);
+                                WorkQueueRobotClass("open", First_To_Initial, false);
+                                WorkQueueRobotClass("close", Initial_To_First, true, Gripper_Object=Box, Gripper_Object_Start_Poses=[Start_Pose]);
                             ];
 
             obj.executeQueue();
@@ -262,9 +265,9 @@ classdef LBRiiwaClass < handle
             % obj.moveWithoutBox(Box_Gripper, Final_To_Second)
 
             obj.Work_Queue = [obj.Work_Queue;
-                                WorkQueueItemClass("close", Midway_To_Second, true, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
-                                WorkQueueItemClass("close", Second_To_Final, true, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
-                                WorkQueueItemClass("open", Final_To_Second, false);
+                                WorkQueueRobotClass("close", Midway_To_Second, true, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
+                                WorkQueueRobotClass("close", Second_To_Final, true, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
+                                WorkQueueRobotClass("open", Final_To_Second, false);
                             ];
 
             obj.executeQueue();
