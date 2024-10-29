@@ -30,19 +30,27 @@ classdef UR3eClass < handle
         end
 
         % Estop functionality
-        function pressEStop(obj)
-            if obj.Run_Status == true
-                obj.Run_Status = false;
-                obj.eStop_Hold = true;
-            elseif obj.eStop_Hold == true
-                obj.eStop_Hold = false;
-            end
+        function Run_Status = engageEStop(obj)
+   
+            obj.Run_Status = false;
+            obj.eStop_Hold = true;
+ 
+
+            Run_Status = obj.Run_Status();
+        end
+
+        function Run_Status = disengageEStop(obj)
+
+            obj.eStop_Hold = false;
+
+            Run_Status = obj.Run_Status();
         end
 
         function resumeOperation(obj)
             if obj.eStop_Hold == false
                 obj.Run_Status = true;
             end
+            executeQueue();
         end
 
         % Check whether robot is busy
@@ -52,10 +60,13 @@ classdef UR3eClass < handle
         end
 
         % Execute work queue
-        function executeQueue(obj)      
+        function executeQueue(obj)    
+            disp("Work Queue")
+            disp(obj.Work_Queue)
             % For every work item
-            while size(obj.Work_Queue, 1) > 0
+            while prod(size(obj.Work_Queue)) > 0 
                 % For every joint angle configuration
+                disp(size(obj.Work_Queue(1).traj))
                 while size(obj.Work_Queue(1).traj, 1) > 0
                     % Confirm run status
                     if obj.Run_Status == false
@@ -74,8 +85,8 @@ classdef UR3eClass < handle
                     end
                     
                     % Movement
-                    if obj.Work_Queue(1).Gripper_Object
-                        obj.animateWithCandy(obj.Work_Queue(1).traj(1, :), obj.Work_Queue(1).Gripper_Object, obj.Work_Queue(1).Gripper_Object_Start_Pose);
+                    if obj.Work_Queue(1).Gripper_Has_Object
+                        obj.animateWithCandy(obj.Work_Queue(1).traj(1, :), obj.Work_Queue(1).Gripper_Object, obj.Work_Queue(1).Gripper_Object_Start_Poses(1:4, :));
                     else
                         obj.animateWithoutCandy(obj.Work_Queue(1).traj(1, :));
                     end
@@ -108,21 +119,23 @@ classdef UR3eClass < handle
                 % Calculate inverse kinematics to get initial joint angles
                 Candy_Waypoint = obj.UR3e.model.ikcon(Start_Pose);
             
-                Current_To_First = [UR3e_Pose, First_Waypoint, 30];
-                First_To_Initial = [First_Waypoint, Candy_Waypoint, 20];
-                Initial_To_First = [Candy_Waypoint, First_Waypoint, 20];
-                First_To_Second = [First_Waypoint, Second_Waypoint, 30];
-                Second_To_Final = [Second_Waypoint, Final_Waypoint, 20];
-                Final_To_Second = [Final_Waypoint, Second_Waypoint, 20];
+                Current_To_First = jtraj(UR3e_Pose, First_Waypoint, 30);
+                First_To_Initial = jtraj(First_Waypoint, Candy_Waypoint, 20);
+                Initial_To_First = jtraj(Candy_Waypoint, First_Waypoint, 20);
+                First_To_Second = jtraj(First_Waypoint, Second_Waypoint, 30);
+                Second_To_Final = jtraj(Second_Waypoint, Final_Waypoint, 20);
+                Final_To_Second = jtraj(Final_Waypoint, Second_Waypoint, 20);
 
                 obj.Work_Queue = [obj.Work_Queue;
-                                    WorkQueueItemClass("open", Current_To_First);          
-                                    WorkQueueItemClass("open", First_To_Initial);     
-                                    WorkQueueItemClass("close", Initial_To_First, Gripper_Object=Candy, Gripper_Object_Start_Pose=Start_Pose);     
-                                    WorkQueueItemClass("close", First_To_Second, Gripper_Object=Candy, Gripper_Object_Start_Pose=Start_Pose);    
-                                    WorkQueueItemClass("close", Second_To_Final, Gripper_Object=Candy, Gripper_Object_Start_Pose=Start_Pose);
-                                    WorkQueueItemClass("open", Final_To_Second);
+                                    WorkQueueItemClass("open", Current_To_First, false);          
+                                    WorkQueueItemClass("open", First_To_Initial, false);     
+                                    WorkQueueItemClass("close", Initial_To_First, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);     
+                                    WorkQueueItemClass("close", First_To_Second, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);    
+                                    WorkQueueItemClass("close", Second_To_Final, true, Gripper_Object=Candy, Gripper_Object_Start_Poses=[Start_Pose]);
+                                    WorkQueueItemClass("open", Final_To_Second, false);
                                     ];
+
+                obj.executeQueue();
        
                 % % Animate the robot for each part of the movement
                 % obj.moveWithoutCandy(Candy_Gripper, Current_To_First)

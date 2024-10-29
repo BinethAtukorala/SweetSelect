@@ -11,6 +11,8 @@ classdef MainProgram < handle
         UR3e
         Front_Box_Poses
         Back_Box_Poses
+        E_Stop % Track whether emergency stop is engaged
+        Run_Status % Running status of the robots
     end
 
     methods
@@ -29,6 +31,10 @@ classdef MainProgram < handle
             
             % Create an instance of the EnvironmentClass, representing the environment
             obj.Environment = EnvironmentClass();
+
+            % Set E_Stop disengaged and Run_Status as running
+            obj.E_Stop = false;
+            obj.Run_Status = true;
             
             % Create an instance of the GripperBox class, representing the box gripper for handling boxes
             obj.Box_Gripper = GripperBoxClass();
@@ -53,12 +59,20 @@ classdef MainProgram < handle
 
             %% Boxes
             obj.Front_Box_Poses = [
-                -1.15, 0.9, 0.66;
+                -1.15, 0.9, 0.8;
+                -1.15, 0.9, 0.76;
+                -1.15, 0.9, 0.72;
+                -1.15, 0.9, 0.68;
+                -1.15, 0.9, 0.64;
                 -1.15, 0.9, 0.6;
             ];
             
             obj.Back_Box_Poses = [
-                -1.15, 1.1, 0.66;
+                -1.15, 1.1, 0.8;
+                -1.15, 1.1, 0.76;
+                -1.15, 1.1, 0.72;
+                -1.15, 1.1, 0.68;
+                -1.15, 1.1, 0.64;
                 -1.15, 1.1, 0.6;
             ];
             
@@ -89,21 +103,7 @@ classdef MainProgram < handle
                 end
             end
 
-            % Place remaining unselected candies using PlaceObject
-            % Unselected Raspberry candies
-            for i = Raspberry_Count+1:size(obj.Raspberry, 1)
-                PlaceObject('candyBallRaspberry.ply', obj.Raspberry(i, :));
-            end
-            
-            % Unselected Blueberry candies
-            for i = Blueberry_Count+1:size(obj.Blueberry, 1)
-                PlaceObject('candyBallBlueberry.ply', obj.Blueberry(i, :));
-            end
-            
-            % Unselected Greenapple candies
-            for i = Greenapple_Count+1:size(obj.Greenapple, 1)
-                PlaceObject('candyBallGreenApple.ply', obj.Greenapple(i, :));
-            end
+
             
             Candy_Final_Poses = [                                         
                 0.48, 1, 0.95;
@@ -119,21 +119,21 @@ classdef MainProgram < handle
             Boxes = [];
             Box_Initial_Poses = [];
             
-            % If 1 or 2 boxes are needed, select from the front
-            if Num_Boxes <= 2
+            % If less than or equal to 6 boxes are needed, select from the front
+            if Num_Boxes <= 6
                 for i = 1:Num_Boxes
                     Boxes = [Boxes, BoxClass(obj.Front_Box_Poses(i, :))];
                     Box_Initial_Poses = [Box_Initial_Poses; obj.Front_Box_Poses(i, :)];
                 end
             % If more than 2 boxes are needed, take 2 from the front and the rest from the back
-            elseif Num_Boxes > 2
+            elseif Num_Boxes > 6
                 % If more than 2 boxes are needed, take 2 from the front and the rest from the back
-                for a = 1:2
+                for a = 1:6
                     Boxes = [Boxes, BoxClass(obj.Front_Box_Poses(a, :))];
                     Box_Initial_Poses = [Box_Initial_Poses; obj.Front_Box_Poses(a, :)];
                 end
             
-                for b = 1:(Num_Boxes - 2)
+                for b = 1:(Num_Boxes - 6)
                     Boxes = [Boxes, BoxClass(obj.Back_Box_Poses(b, :))];
                     Box_Initial_Poses = [Box_Initial_Poses; obj.Back_Box_Poses(b, :)];
                 end
@@ -150,8 +150,8 @@ classdef MainProgram < handle
                 end
             end
             
-            if Num_Boxes >= 2 && (Num_Boxes - 2) < size(obj.Back_Box_Poses, 1)
-                for i = Num_Boxes - 2 + 1:size(obj.Back_Box_Poses, 1)
+            if Num_Boxes >= 6 && (Num_Boxes - 6) < size(obj.Back_Box_Poses, 1)
+                for i = Num_Boxes - 6 + 1:size(obj.Back_Box_Poses, 1)
                     PlaceObject('box.ply', obj.Back_Box_Poses(i, :));
                 end
             end
@@ -169,26 +169,26 @@ classdef MainProgram < handle
             
                 if Box_Index <= 2
             
-                    [Box_Start_Pose] = obj.LBRiiwa.moveFrontToMidway( obj.Box_Gripper, Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
+                    [Box_Start_Pose] = obj.LBRiiwa.moveFrontToMidway( Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
                     Candy_Start_Poses = [];
             
                     for x = Start_Index:End_Index
-                        [Candy_Start_Pose] = obj.UR3e.moveUR3e(obj.Candy_Gripper, Candy_Initial_Poses(x,:), Candy_Final_Poses, Candies(x), x);
+                        [Candy_Start_Pose] = obj.UR3e.moveUR3e( Candy_Initial_Poses(x,:), Candy_Final_Poses, Candies(x), x);
                         Candy_Start_Poses = [Candy_Start_Poses; Candy_Start_Pose];
                     end
             
-                    obj.LBRiiwa.moveFrontFromMidway( obj.Box_Gripper, Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
+                    obj.LBRiiwa.moveFrontFromMidway( Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
             
                 else
             
-                    [Box_Start_Pose] = obj.LBRiiwa.moveBackToMidway( obj.Box_Gripper, Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
+                    [Box_Start_Pose] = obj.LBRiiwa.moveBackToMidway( Box_Initial_Poses(Box_Index,:), Boxes(Box_Index));
                     Candy_Start_Poses = [];
             
                     for x = Start_Index:End_Index
-                        [Candy_Start_Pose] = obj.UR3e.moveUR3e( obj.Candy_Gripper, Candy_Initial_Poses(x,:), Candy_Final_Poses, Candies(x), x);
+                        [Candy_Start_Pose] = obj.UR3e.moveUR3e( Candy_Initial_Poses(x,:), Candy_Final_Poses, Candies(x), x);
                         Candy_Start_Poses = [Candy_Start_Poses; Candy_Start_Pose];
                     end
-                    obj.LBRiiwa.moveBackFromMidway( obj.Box_Gripper, Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
+                    obj.LBRiiwa.moveBackFromMidway( Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
             
                 end
             end
@@ -214,10 +214,10 @@ classdef MainProgram < handle
 
         function setQValues(obj, q, robot)
             if robot == "LBRiiwa"
-                obj.LBRiiwa.moveWithoutBox(obj.Box_Gripper, q);
+                obj.LBRiiwa.moveWithoutBox(q);
             end
             if robot == "UR3e"
-                obj.UR3e.moveWithoutCandy(obj.Candy_Gripper, q);
+                obj.UR3e.moveWithoutCandy(q);
             end
         end
 
@@ -237,8 +237,28 @@ classdef MainProgram < handle
             
         end
 
-        
+        function e_stop_status = pressEStop(obj)
+            if obj.E_Stop
+                obj.E_Stop = false;
+                obj.UR3e.disengageEStop();
+                obj.LBRiiwa.disengageEStop();
+            else
+                obj.E_Stop = true;
+                obj.Run_Status = false;
 
+                obj.UR3e.engageEStop();
+                obj.LBRiiwa.engageEStop();
+            end
+            e_stop_status = obj.E_Stop;
+            
+        end
+
+        function run_status = resumeOperation(obj)
+            if obj.E_Stop == false
+                obj.Run_Status = true;
+            end
+            run_status = obj.Run_Status;
+        end
 
     end
 
