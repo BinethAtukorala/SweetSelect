@@ -91,7 +91,18 @@ classdef MainProgram < handle
                 -1.15, 1.1, 0.6;
             ];
             
-            
+            threshold = 0.5; 
+            % Obtain the limits of the axes
+            %zp = get(gca,'Zlim');
+            zp = [0.5 2.5];
+            xp = get(gca,'Xlim');
+            % Use the axes x and Y limits to find the co-ordinates for the patch
+            x1 = [ xp(1) xp(2) xp(2) xp(1)];
+            z1 = [ zp(1) zp(1) zp(2) zp(2)];y1 = ones(1,numel(z1))* threshold; 
+            v = patch(x1,y1,z1, 'g');
+            set(v,'facealpha',0.2);
+            set(v,'edgealpha',0.2);
+            set(gcf,'renderer','opengl') ;
 
         end
         
