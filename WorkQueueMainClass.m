@@ -14,7 +14,7 @@ classdef WorkQueueMainClass
             arguments
                 Initial_Poses
                 Object
-                isUR3e logical
+                Is_UR3e logical
                 options.Is_Front
                 options.Is_To_Midway
                 options.Final_Poses
