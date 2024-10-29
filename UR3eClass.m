@@ -139,23 +139,6 @@ classdef UR3eClass < handle
 
                 obj.executeQueue();
        
-                % % Animate the robot for each part of the movement
-                % obj.moveWithoutCandy(Candy_Gripper, Current_To_First)
-                % 
-                % obj.moveWithoutCandy(Candy_Gripper, First_To_Initial)
-                % 
-                % Candy_Gripper.closeGripper();
-                % 
-                % % move robot towards LBRiiwa
-                % obj.moveWithCandy(Candy_Gripper, Initial_To_First, Candy, Start_Pose)
-                % 
-                % obj.moveWithCandy(Candy_Gripper, First_To_Second, Candy, Start_Pose)
-                % 
-                % obj.moveWithCandy(Candy_Gripper, Second_To_Final, Candy, Start_Pose)
-                % 
-                % Candy_Gripper.openGripper();
-                % 
-                % obj.moveWithoutCandy(Candy_Gripper, Final_To_Second)
         end
 
 
@@ -224,7 +207,7 @@ classdef UR3eClass < handle
             
             % Define sphere properties
             Sphere_Center = Box_Origin;  % Sphere center is the box origin
-            Radius = Max_Distance + 0.2;  % Sphere radius is max distance + 0.1
+            Radius = Max_Distance + 0.1;  % Sphere radius is max distance + 0.1
 
             % Create sphere
             [X, Y, Z] = sphere(20);
@@ -256,16 +239,7 @@ classdef UR3eClass < handle
         function moveWithGivenPose(obj, Final_X, Final_Y, Final_Z)
             % Check for collision
             [Box_Faces, Box_Vertices, ~] = plyread('toolbox.ply', 'tri');
-            % Box_Position = [0.94, 0.85, 0.8]; % Position of the box
             Box_Position = [0.94, 1.5, 0.8]; % Position of the box
-            
-            Final_X = 1.24;
-            Final_Y = 1.65;
-            Final_Z = 0.9;
-
-            % 
-            % Create the box object
-            % Box = PlaceObject("toolbox.ply", Box_Position);
             
             % Get transformed vertices of the box
             Box_Vertices_Transformed = [Box_Vertices, ones(size(Box_Vertices, 1), 1)] * transl(Box_Position)';
@@ -288,7 +262,9 @@ classdef UR3eClass < handle
             obj.UR3e.model.animate(Initial_Joint_Angles); 
             
             % Define translation of the target pose
-            Translation_Target = transl(Final_X, Final_Y, Final_Z)
+            Translation_Target = transl(Final_X, Final_Y, Final_Z);
+            disp("VALUE")
+            disp(Translation_Target)
             
             % Combine rotation and translation to form the target pose
             Target_Pose = Translation_Target * trotx(pi); % The final transformation matrix
@@ -305,11 +281,11 @@ classdef UR3eClass < handle
             M = [1 1 1 zeros(1, 3)]; 
             
             % Get current pose of UR3e
-            UR3e_Pose = obj.UR3e.model.fkine(Q_Start).T
+            UR3e_Pose = obj.UR3e.model.fkine(Q_Start).T;
             
             % Define start and end positions
             X1 = UR3e_Pose(1:3, 4); % Current end-effector position
-            X2 = Target_Pose(1:3, 4); % Desired end-effector position (from target pose)
+            X2 = Target_Pose(1:3, 4) % Desired end-effector position (from target pose)
             
             % Create trajectory using RMRC
             X = zeros(3, Steps);

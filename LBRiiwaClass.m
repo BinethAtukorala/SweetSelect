@@ -133,22 +133,12 @@ classdef LBRiiwaClass < handle
             Initial_To_First = jtraj(Box_Waypoint, Front_First_Waypoint, 50);
             First_To_Midway = jtraj(Front_First_Waypoint, Front_Midway_Waypoint, 50);
 
-            % move robot from current pose to pick up box
-            % obj.moveWithoutBox(Box_Gripper, Current_To_First);
-            % 
-            % obj.moveWithoutBox(Box_Gripper, First_To_Initial);
 
             obj.Work_Queue = [obj.Work_Queue; ...
                                 WorkQueueRobotClass("open", Current_To_First, false);
                                 WorkQueueRobotClass("open", First_To_Initial, false);
                             ];
 
-            % obj.Box_Gripper.closeGripper();
-
-            % move robot from intial pose towards UR3
-            % obj.moveWithBox(Box_Gripper, Initial_To_First, Box, Start_Pose);
-            % 
-            % obj.moveWithBox(Box_Gripper, First_To_Midway, Box, Start_Pose);
 
             obj.Work_Queue = [obj.Work_Queue;
                                 WorkQueueRobotClass("close", Initial_To_First, true, Gripper_Object=Box, Gripper_Object_Start_Poses=[Start_Pose]);
@@ -176,14 +166,7 @@ classdef LBRiiwaClass < handle
             Second_To_Final = jtraj(Front_Second_Waypoint, Front_Final_Waypoint(Box_Index,:), 50);
             Final_To_Second = jtraj(Front_Final_Waypoint(Box_Index,:), Front_Second_Waypoint, 50);
 
-            % move robot from UR3 towards counter
-            % obj.moveWithFilledBox(Box_Gripper, Midway_To_Second, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
-            % 
-            % obj.moveWithFilledBox(Box_Gripper, Second_To_Final, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
-            % 
-            % obj.Box_Gripper.openGripper();
-            % 
-            % obj.moveWithoutBox(Box_Gripper, Final_To_Second)
+
 
             obj.Work_Queue = [obj.Work_Queue;
                                 WorkQueueRobotClass("close", Midway_To_Second, 2, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
@@ -217,18 +200,6 @@ classdef LBRiiwaClass < handle
             Initial_To_First = jtraj(Box_Waypoint, Back_First_Waypoint, 50);
             First_To_Midway = jtraj(Back_First_Waypoint, Back_Midway_Waypoint, 50);
 
-            % move robot from current pose to pick up box
-            % obj.moveWithoutBox(LBRiiwa, Box_Gripper, Current_To_First)
-            % 
-            % obj.moveWithoutBox(LBRiiwa, Box_Gripper, First_To_Initial)
-            % 
-            % obj.Box_Gripper.closeGripper();
-            % 
-            % % move robot from intial pose towards UR3
-            % obj.moveWithBox(LBRiiwa, Box_Gripper, Initial_To_First, Box, Start_Pose)
-            % 
-            % obj.moveWithBox(LBRiiwa, Box_Gripper, First_To_Midway, Box, Start_Pose)
-
             obj.Work_Queue = [obj.Work_Queue;
                                 WorkQueueRobotClass("open", Current_To_First, false);
                                 WorkQueueRobotClass("open", First_To_Initial, false);
@@ -256,14 +227,7 @@ classdef LBRiiwaClass < handle
             Second_To_Final = jtraj(Back_Second_Waypoint, Back_Final_Waypoint(Box_Index,:), 50);
             Final_To_Second = jtraj(Back_Final_Waypoint(Box_Index,:), Back_Second_Waypoint, 50);
 
-            % move robot from UR3 towards counter
-            % obj.moveWithFilledBox(Box_Gripper, Midway_To_Second, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
-            % 
-            % obj.moveWithFilledBox(Box_Gripper, Second_To_Final, Box, Candies, Box_Start_Pose, Candy_Start_Poses)
-            % 
-            % obj.Box_Gripper.openGripper();
-            % 
-            % obj.moveWithoutBox(Box_Gripper, Final_To_Second)
+
 
             obj.Work_Queue = [obj.Work_Queue;
                                 WorkQueueRobotClass("close", Midway_To_Second, true, Gripper_Object=Box, Gripper_Extra_Objects=Candies, Gripper_Object_Start_Poses=[Box_Start_Pose; Candy_Start_Poses]);
@@ -379,9 +343,6 @@ classdef LBRiiwaClass < handle
             [Box_Faces, Box_Vertices, ~] = plyread('toolbox.ply', 'tri');
             Box_Position = [-0.3, 1.7, 0.5];% Position of the box
             
-            % Create the box object
-            % Box = PlaceObject("toolbox.ply", Box_Position);
-            
             % Get transformed vertices of the box
             Box_Vertices_Transformed = [Box_Vertices, ones(size(Box_Vertices, 1), 1)] * transl(Box_Position)';
             Box_Vertices_Transformed = Box_Vertices_Transformed(:, 1:3);  % Get transformed vertices
@@ -426,10 +387,10 @@ classdef LBRiiwaClass < handle
         function moveWithGivenPose(obj, Final_X, Final_Y, Final_Z)
             % Check for collision
             [Box_Faces, Box_Vertices, ~] = plyread('toolbox.ply', 'tri');
-            Box_Position = [0.94, 0.85, 0.8]; % Position of the box
+            Box_Position = [-0.3, 1.6, 0.5]; % Position of the box
             
-            % Create the box object
-            % Box = PlaceObject("toolbox.ply", Box_Position);
+            
+
             
             % Get transformed vertices of the box
             Box_Vertices_Transformed = [Box_Vertices, ones(size(Box_Vertices, 1), 1)] * transl(Box_Position)';
@@ -483,7 +444,7 @@ classdef LBRiiwaClass < handle
             end
             
             % Initialize joint angles matrix
-            Q_Matrix = nan(Steps, 6);
+            Q_Matrix = nan(Steps, 7);
             Q_Matrix(1, :) = Q_Start; % Initial joint configuration
             
             % Damped least squares parameter (Lambda)

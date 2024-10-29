@@ -5,33 +5,38 @@ classdef MainProgram < handle
         Raspberry_Pose % Poses for raspberry
         Blueberry_Pose % Poses for blueberry
         Greenapple_Pose % Poses for green apple
-        Environment
-        Box_Gripper
-        Candy_Gripper
+        Environment % Environment data
+        Box_Gripper % Gripper used to grab the box
+        Candy_Gripper % Gripper used to grab candy
         LBRiiwa
         UR3e
-        Front_Box_Poses
-        Back_Box_Poses
+        Candies % Candy class objects
+        Boxes % Box class objects
+
+        Front_Box_Poses % Poses of the boxes at the front
+        Back_Box_Poses % Poses of the boxes at the back
+        Candy_Initial_Poses % Initial poses of the candy
+        Candy_Final_Poses % Final poses of the candies
+        Box_Initial_Poses % Initial poses of the boxes
+
         E_Stop % Track whether emergency stop is engaged
         Run_Status % Running status of the robots
-        resume_box_index
-        resume_candy_index
-        resume_work_code
+        Resume_Box_Index % The box being held when resuming
+        Resume_Candy_Index % The candy being held when resuming
+        Resume_Work_Code % Code of the current operation being run when resuming
 
-        Candy_Initial_Poses
-        Candies
-        Candy_Final_Poses
-        Boxes
-        Box_Initial_Poses
+        Obstacles   % Track obstacles in the environment that might come in contact 
+                    % with the light curtain (Using spheres around the objects)
+        Light_Curtain_Pos
     end
 
     methods
         %% Constructor to initialize the robot model
-        function obj = MainProgram()
+        function obj = MainProgram(Light_Curtain_Pos)
 
             hold on
             xlim([-2, 2]);                                              
-            ylim([-2, 2.5]);
+            ylim([-1.5, 2.5]);
             zlim([0, 2.5]);
             
             addpath('C:\Data\SweetSelect\Environment')
@@ -43,9 +48,12 @@ classdef MainProgram < handle
             % Create an instance of the EnvironmentClass, representing the environment
             obj.Environment = EnvironmentClass();
 
-            obj.resume_box_index = 0;
-            obj.resume_candy_index = 0;
-            obj.resume_work_code = 0;
+            obj.Resume_Box_Index = 0;
+            obj.Resume_Candy_Index = 0;
+            obj.Resume_Work_Code = 0;
+
+            obj.Light_Curtain_Pos = Light_Curtain_Pos;
+            obj.Obstacles = [];
 
             % Set E_Stop disengaged and Run_Status as running
             obj.E_Stop = false;
@@ -105,55 +113,12 @@ classdef MainProgram < handle
             set(gcf,'renderer','opengl') ;
 
         end
-        
-        function executeQueue(obj) % take x, Box_Index, Start_Index, End_Index as parameters
-            while prod(size(obj.Work_Queue)) > 0 
-                % WorkQueueMainClass(Initial_Poses, Object, Is_UR3e, options)
-                % options.Is_Front
-                % options.Is_To_Midway
-                % options.Final_Poses
-                % options.Candy_No
-                if obj.Work_Queue(1).Is_UR3e
-                    % Run movement for UR3e
-                    [Candy_Start_Pose] = WorkQueueMainClass(Candy_Initial_Poses(x,:), Candies(x), true, Final_Poses = Candy_Final_Poses, Candy_No = x);
-                    Candy_Start_Poses = [Candy_Start_Poses; Candy_Start_Pose];
-                elseif obj.Work_Queue(1).Is_Front 
-                    % Run movement for LBRiiwa front
-                    if obj.Work_Queue(1).Is_To_Midway
-                        % Run movemement to midway
-                        [Box_Start_Pose] = WorkQueueMainClass(Box_Initial_Poses(Box_Index,:), Boxes(Box_Index), false, Is_Front = true, Is_To_Midway = false);
-                    else
-                        % Run movement from midway
-                        % IDK how to do this cus it takes 2 poses and two
-                        % objects, so might have to make another function
-                        % for it? Or should we write Initial_Pose as
-                        % [Box_Start_Pose, Candy_Start_Poses] or smth
-                        WorkQueueMainClass(Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
-                    end
-
-                else 
-                    % Run movememnt for LBRiiwa back
-                    if obj.Work_Queue(1).Is_To_Midway
-                        % Run movemement to midway
-                        [Box_Start_Pose] = WorkQueueMainClass(Box_Initial_Poses(Box_Index,:), Boxes(Box_Index), Is_Front = false, Is_To_Midway = false);
-                    else
-                        % Run movement from midway
-                        % IDK how to do this cus it takes 2 poses and two
-                        % objects, so might have to make another function
-                        % for it?
-                        WorkQueueMainClass(Boxes(Box_Index), Box_Index, Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
-                    end
-
-                end
-                obj.Work_Queue = obj.Work_Queue(2: size(obj.Work_Queue, 1));
-            end
-        end
 
         function putCandiesInBox(obj, Raspberry_Count, Greenapple_Count, Blueberry_Count)
             % Calculate how many boxes are needed
             Num_Boxes = ceil((Raspberry_Count + Blueberry_Count + Greenapple_Count)/ 3);
             
-            if obj.resume_work_code == 0
+            if obj.Resume_Work_Code == 0
                 obj.Candy_Initial_Poses = [
                     repmat(obj.Raspberry_Pose, Raspberry_Count, 1);  
                     repmat(obj.Greenapple_Pose, Greenapple_Count, 1);  
@@ -236,33 +201,33 @@ classdef MainProgram < handle
             Num_Candies = size(obj.Candy_Initial_Poses, 1);
 
             Start_Box_Index = 1;
-            if obj.resume_work_code
-                Start_Box_Index = obj.resume_box_index;
+            if obj.Resume_Work_Code
+                Start_Box_Index = obj.Resume_Box_Index;
             end
             
             % Iterate through the boxes
             for Box_Index = Start_Box_Index:Num_Boxes
-                obj.resume_box_index = Box_Index;
+                obj.Resume_Box_Index = Box_Index;
                 % Determine the candy indices for this box
                 Start_Index = (Box_Index - 1) * 3 + 1;
-                if obj.resume_work_code
-                    Start_Index = obj.resume_box_index;
+                if obj.Resume_Work_Code
+                    Start_Index = obj.Resume_Box_Index;
                 end
                 End_Index = min(Box_Index * 3, Num_Candies);
             
+                % If taking boxes from the front
                 if Box_Index <= 6
-
-                    % 1st Movement ===========================
-                    if obj.resume_work_code
+                    % 1st Movement (Grab boxes and bring near UR3e) ===========================
+                    if obj.Resume_Work_Code
                         % Make it so that the end effector grips the box from the side
                         Box_Start_Pose = [eye(3), obj.Box_Initial_Poses(Box_Index,:)'; 0, 0, 0, 1] * troty(-pi/2);
                         Box_Start_Pose(1,4) = Box_Start_Pose(1,4) + 0.18;
                         Box_Start_Pose(3,4) = Box_Start_Pose(3,4) + 0.05;
-                        if obj.resume_work_code == 1
+                        if obj.Resume_Work_Code == 1
                             obj.LBRiiwa.executeQueue();
                         end
                     else
-                        obj.resume_work_code = 1;
+                        obj.Resume_Work_Code = 1;
                         [Box_Start_Pose] = obj.LBRiiwa.moveFrontToMidway( obj.Box_Initial_Poses(Box_Index,:), obj.Boxes(Box_Index));
                     end
 
@@ -273,19 +238,19 @@ classdef MainProgram < handle
                     
                     Candy_Start_Poses = [];
                     
-                    % 2nd Movemement ===========================
+                    % 2nd Movemement (Place candies on the box) ===========================
                     for x = Start_Index:End_Index
-                        obj.resume_candy_index = x;
-                        if obj.resume_work_code >= 2
+                        obj.Resume_Candy_Index = x;
+                        if obj.Resume_Work_Code >= 2
                             % Calculate start pose for each candy
                             Candy_Start_Pose = [eye(3), obj.Candy_Initial_Poses(x,:)'; 0, 0, 0, 1] * trotx(pi);
                             Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.09;  % Adjust height
 
-                            if obj.resume_work_code == 2
+                            if obj.Resume_Work_Code == 2
                                 obj.UR3e.executeQueue();
                             end
                         else
-                            obj.resume_work_code = 2;
+                            obj.Resume_Work_Code = 2;
                             [Candy_Start_Pose] = obj.UR3e.moveUR3e( obj.Candy_Initial_Poses(x,:), obj.Candy_Final_Poses, obj.Candies(x), x);
                         end
                         if obj.Run_Status == false
@@ -296,31 +261,31 @@ classdef MainProgram < handle
                     end
                     % ===========================
 
-                    % 3rd Movement ===========================
-                    if obj.resume_work_code == 3
+                    % 3rd Movement (Present box to customer) ===========================
+                    if obj.Resume_Work_Code == 3
                         obj.LBRiiwa.executeQueue();
                     else
-                        obj.resume_work_code = 3;
+                        obj.Resume_Work_Code = 3;
                         obj.LBRiiwa.moveFrontFromMidway( obj.Boxes(Box_Index), Box_Index, obj.Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
                     end
                     if obj.Run_Status == false
                         return
                     end
                     % ===========================
-            
+                
+                % If taking boxes from the back
                 else
-
-                    % 1st Movement ===========================
-                    if obj.resume_work_code
+                    % 1st Movement (Grab boxes and bring near UR3e) ===========================
+                    if obj.Resume_Work_Code
                         % Make it so that the end effector grips the box from the side
                         Box_Start_Pose = [eye(3), obj.Box_Initial_Poses(Box_Index,:)'; 0, 0, 0, 1] * troty(-pi/2);
                         Box_Start_Pose(1,4) = Box_Start_Pose(1,4) + 0.18;
                         Box_Start_Pose(3,4) = Box_Start_Pose(3,4) + 0.05;
-                        if obj.resume_work_code == 1
+                        if obj.Resume_Work_Code == 1
                             obj.LBRiiwa.executeQueue();
                         end
                     else
-                        obj.resume_work_code = 1;
+                        obj.Resume_Work_Code = 1;
                         [Box_Start_Pose] = obj.LBRiiwa.moveBackToMidway( obj.Box_Initial_Poses(Box_Index,:), obj.Boxes(Box_Index));
                     end
 
@@ -331,18 +296,18 @@ classdef MainProgram < handle
 
                     Candy_Start_Poses = [];
             
-                    % 2nd Movement ===========================
+                    % 2nd Movemement (Place candies on the box) ===========================
                     for x = Start_Index:End_Index
-                        if obj.resume_work_code >= 2
+                        if obj.Resume_Work_Code >= 2
                             % Calculate start pose for each candy
                             Candy_Start_Pose = [eye(3), obj.Candy_Initial_Poses(x,:)'; 0, 0, 0, 1] * trotx(pi);
                             Candy_Start_Pose(3,4) = Candy_Start_Pose(3,4) + 0.09;  % Adjust height
 
-                            if obj.resume_work_code == 2
+                            if obj.Resume_Work_Code == 2
                                 obj.UR3e.executeQueue();
                             end
                         else
-                            obj.resume_work_code = 2;
+                            obj.Resume_Work_Code = 2;
                             [Candy_Start_Pose] = obj.UR3e.moveUR3e( obj.Candy_Initial_Poses(x,:), obj.Candy_Final_Poses, obj.Candies(x), x);
                         end
 
@@ -353,11 +318,11 @@ classdef MainProgram < handle
                     end
                     % ===========================
 
-                    % 3rd Movement ===========================
-                    if obj.resume_work_code
+                    % 3rd Movement (Present box to customer) ===========================
+                    if obj.Resume_Work_Code
                         obj.LBRiiwa.executeQueue();
                     else
-                        obj.resume_work_code = 3;
+                        obj.Resume_Work_Code = 3;
                         obj.LBRiiwa.moveBackFromMidway( obj.Boxes(Box_Index), Box_Index, obj.Candies(Start_Index:End_Index), Box_Start_Pose, Candy_Start_Poses);
                     end
                     if obj.Run_Status == false
@@ -367,14 +332,15 @@ classdef MainProgram < handle
             
                 end
 
-                % Finish movememnt
-                obj.resume_work_code = 0;
-                obj.resume_box_index = 0;
-                obj.resume_candy_index = 0;
+                % Finish movememnt by going to reset position
+                obj.Resume_Work_Code = 0;
+                obj.Resume_Box_Index = 0;
+                obj.Resume_Candy_Index = 0;
             end
             
         end
-
+        
+        % Get joint angles for the robot specified
         function result = getQValues(obj, robot)
             if robot == "LBRiiwa"
                 result = obj.LBRiiwa.LBRiiwa.model.getpos();
@@ -384,6 +350,7 @@ classdef MainProgram < handle
             end
         end
 
+        % Get joint angle limits for the robot specified
         function result = getQLims(obj, robot)
             if robot == "LBRiiwa"
                 result = obj.LBRiiwa.LBRiiwa.model.qlim;
@@ -393,6 +360,7 @@ classdef MainProgram < handle
             end
         end
 
+        % Set joint angles of the robot specified
         function setQValues(obj, Q, Robot)
             while Robot == "LBRiiwa"
                 obj.LBRiiwa.moveWithTeach(Q);
@@ -402,6 +370,7 @@ classdef MainProgram < handle
             end
         end
 
+        % Get transformation and RPY data of the robot specified
         function [tr, rpy] = getTrAndRPY(obj, q, robot)
             tr = [0 0 0];
             rpy = [0 0 0];
@@ -418,11 +387,14 @@ classdef MainProgram < handle
             
         end
 
+        % When eStop button is pressed
         function e_stop_status = pressEStop(obj)
+            % disengage estop if currently engaged
             if obj.E_Stop
                 obj.E_Stop = false;
                 obj.UR3e.disengageEStop();
                 obj.LBRiiwa.disengageEStop();
+            % engage estop if not engaged
             else
                 obj.E_Stop = true;
                 obj.Run_Status = false;
@@ -433,7 +405,21 @@ classdef MainProgram < handle
             e_stop_status = obj.E_Stop;
             
         end
+    
+        % Engage EStop
+        function e_stop_status = engageEStop(obj)
 
+            obj.E_Stop = true;
+            obj.Run_Status = false;
+
+            obj.UR3e.engageEStop();
+            obj.LBRiiwa.engageEStop();
+
+            e_stop_status = obj.E_Stop;
+            
+        end
+
+        % resume opertation of the robots
         function run_status = resumeOperation(obj)
             if obj.E_Stop == false
                 obj.Run_Status = true;
@@ -441,6 +427,34 @@ classdef MainProgram < handle
                 obj.LBRiiwa.resumeOperation();
             end
             run_status = obj.Run_Status;
+        end
+
+        % ----------- Light curtain -----------
+
+        % Add obstacle to be tracked by the light curtain
+        function index = addObstacle(obj, Center_Point, Radius)
+            obj.Obstacles = [obj.Obstacles; Center_Point Radius]
+            index = size(obj.Obstacles, 1);
+
+            obj.checkLightCurtainCollision();
+        end
+
+        % Update obstacle center point
+        function updateObstacle(obj, index, Center_Point)
+            obstacle_data = [Center_Point obj.Obstacles(index, 3)];
+            obj.Obstacles(1, :) = obstacle_data;
+
+            obj.checkLightCurtainCollision();
+        end
+
+        % Check collision
+        function isCollision = checkLightCurtainCollision(obj)
+            isCollision = false;
+            for i = 1:size(obj.Obstacles, 1)
+                if abs(obj.Light_Curtain_Pos - obj.Obstacles(i, 2)) <= obj.Obstacles(i, 4)
+                    isCollision = true;
+                end
+            end
         end
 
     end

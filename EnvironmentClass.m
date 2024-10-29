@@ -9,7 +9,7 @@ classdef EnvironmentClass
             % Adding a .ply file as the flat background surface (Code 
             % taken from Canvas in Lab Assignment 1 submission page) 
             surf([-2, -2; 2, 2], ...               % X coordinates
-                 [-2, 2.5; -2, 2.5], ...               % Y coordinates
+                 [-1.5, 2.5; -1.5, 2.5], ...               % Y coordinates
                  [0.0, 0.0; 0.0, 0.0], ...                 % Z coordinates 
                  'CData', imread('pinktiles.jpg'), ...            
                  'FaceColor', 'texturemap');      
@@ -32,9 +32,10 @@ classdef EnvironmentClass
             Credit_Card_Reader = PlaceObject('creditCardReader.ply', [-1.2, 0.1, 0.5]);
             Monitor = PlaceObject('monitor.ply', [-1.5, 0.1, 0.5]);
 
-            Customer = PlaceObject('personMaleCasual.ply', [-1, 1.8, 0]);
+            Customer = PlaceObject('personMaleCasual.ply', [-1.4, 2, 0]);
             rotate(Customer, [0, 0, 1], 90);
             Staff = PlaceObject('personFemaleBusiness.ply', [1.5, -0.8, 0]);
+            Staff_2 = PlaceObject('personFemaleBusiness.ply', [-0.8, -0.8, 0]);
             
             TableRound = PlaceObject('tableRound0.3x0.3x0.3m.ply', [1.1, -0.8, 0]); 
             EmergencyStop = PlaceObject('emergencyStopButton.ply', [0.975, -0.775, 0.3]); 
@@ -43,6 +44,9 @@ classdef EnvironmentClass
             Blueberry_Jar = PlaceObject('blueberryJar.ply', [0.8, 1.6, 0.8]);
             Greenapple_Jar = PlaceObject('greenappleJar.ply', [0.65, 1.6, 0.8]);
 
+            ToolBox_UR3e = PlaceObject('toolbox.ply',[0.94, 1.5, 0.8]);
+            Item_Box_UR3e_1 = PlaceObject("toolbox.ply", [0.94, 0.85, 0.8])
+            ToolBox_LBRiiwa = PlaceObject('toolbox.ply',[-0.3, 1.6, 0.5]);
         end
     end
 end
